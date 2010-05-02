@@ -35,10 +35,10 @@ extern uint16_t mwindex;
 MESSWERT sendpuf[MESSPUFSIZE];
 uint16_t spindex = 0;
 
-static char *HOSTNAME = "solar.schlossabi84.de";
+static char *HOSTNAME = "your.hostname.goes.here";
 static uip_conn_t *post_conn;
 static char *poststr1 = "POST /upload_file.php HTTP/1.0\r\n"
-		  "Host: solar.schlossabi84.de\r\n"
+		  "Host: your.hostname.goes.here\r\n"
 		  "Content-Type: multipart/form-data; boundary=bOunDaRy\r\nContent-Length: 160000\r\n\r\n";
 static char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
 char post_filename[32] = {'1','2','3','4','5','6','7','8','.','M','C','P',0};
