@@ -1,0 +1,12 @@
+usart_count_used
+if [ "$SOLOMETER_SUPPORT" = y -o $USARTS -gt $USARTS_USED ]; then
+	dep_bool_menu "Photovoltaik-log Support (EXPERIMENTAL)" SOLOMETER_SUPPORT $TCP_SUPPORT $CLOCK_DATETIME_SUPPORT $DNS_SUPPORT $ARCH_AVR $CONFIG_EXPERIMENTAL
+	  dep_bool "Effekta ES3300 Wechselrichter" WR_EFFEKTA $SOLOMETER_SUPPORT
+	  dep_bool "Low RAM usage" PV_CALC_TINY
+	  #dep_bool "SMA Sunny Boy 2100TL Wechselrichter" WR_SMA $SOLOMETER_SUPPORT
+	  #dep_bool "http configuration" SOLOMETER_SOAP_SUPPORT $HTTPD_SOAP_SUPPORT $SOAP_SUPPORT
+	endmenu
+else
+	define_bool SOLOMETER_SUPPORT n
+	comment "SOLOMETER not available. No free usart. ($USARTS_USED/$USARTS)"
+fi

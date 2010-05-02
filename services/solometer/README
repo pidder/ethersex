@@ -1,0 +1,30 @@
+Diese Software dient dazu, den Wechselrichter einer Solaranlage auf
+kostengünstige Art und Weise mehrmals pro Minute auszulesen, die Daten auf
+einem Webserver zu speichern und sie in grafisch ansprechender Art im Internet
+verfügbar zu machen.
+Durch die Verwendung von SVG für den Viewer sehen die Grafiken auch auf dem
+iPhone gut aus.
+
+Version 0.1 läuft bei mir auf der Etherrape-Hardware und auf einem Avr-Netio.
+Am seriellen Anschluss ist ein Effekta ES3300 Wechselrichter über ein
+Nullmodem-Kabel angeschlossen.
+
+*** Zur Zeit kann nur ein Effekta-WR ausgelesen werden. ***
+*** Eine Version für SMA-Wechselrichter ist in Arbeit.  ***
+
+Das Skripte im Verzeichnis 'server' müssen auf deinen Webspace hochgeladen
+werden. Dieser muss eigene Skripte in PHP erlauben.
+Das Skript 'upload_data.php' nimmt die Rohdaten vom Etherrape an, mittelt und
+schreibt Dateien, welche die Skripte 'solometer.svg' und 'solometer.js' (sind
+schon fertig und werden Mitte Mai 2010 veröffentlicht) lesen und darstellen
+können.
+
+Zur Darstellung im Browser (Am besten Firefox ab Version 3.5 oder Opera 10) ruft
+man 'http://deine.webspace.adresse/solometer.svg' auf. Leider unterstützt der IE
+noch kein SVG. Es soll aber ein (kostenloses?) SVG Plugin von Adobe geben.
+
+Mein Dank geht an die Firma Effekta, die mich mit Dokumentation unterstützte,
+sowie an alle Mitarbeiter des Etherrape- und des Ethersex Projekts, von denen
+ich Teile des Codes übernommen habe.
+
+Version 0.1

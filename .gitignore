@@ -50,6 +50,7 @@ protocols/mdns_sd/mdns_services.c
 protocols/uip/ipchair/ipchair.c
 protocols/ecmd/np_simple_glue.m4
 protocols/ecmd/wiki.txt
+services/solometer/soap/*
 
 # User defined pinning/named_pin profiles
 pinning/hardware/user*.m4

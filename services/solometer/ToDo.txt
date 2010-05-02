@@ -1,0 +1,20 @@
+solometer-dateien:
+- Fehlermeldungen des WR mitsenden
+- Bessere Reaktion auf Timeouts
+- Webinterface zum Einstellen der Parameter:
+  Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
+  Keep-raw-files,...
+- Parametrisierung in Ethersex: Upload-URL,Messfrequenz,DHCP ?
+- 'Kennung' zur Individualisierung der einzelnen Solometer
+
+upload_data.php:
+- alte Raw files löschen
+- Neuen Integrationsalgorithmus für Solardaten
+- Kommentarzeilen in RAW-Files überlesen
+- Falls Datenfiles nicht existieren, neu anlegen 
+  und mit Null füllen, sonst ist die Darstellung neuer Anlagen
+  scheusslich.
+
+server/solometer.js:
+- wbox besser positionieren
+- Daten in wbox tabellarisch listen
