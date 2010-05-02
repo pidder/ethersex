@@ -27,4 +27,9 @@ Mein Dank geht an die Firma Effekta, die mich mit Dokumentation unterstützte,
 sowie an alle Mitarbeiter des Etherrape- und des Ethersex Projekts, von denen
 ich Teile des Codes übernommen habe.
 
-Version 0.1
+Version 0.1 Anmerkungen:
+- Der Hostname des Webservers muss noch händisch in pv_inet eingetragen werden.
+- Solometer braucht clock, dns und TCP
+- Wählt man Debugging, funktioniert die Kommunikation mit dem WR nicht mehr. Man
+  kann dann an die serielle Schnittstelle ein Terminal mit den Einstellungen
+  9600/8N1 anschliessen, um die Debug-Meldungen zu sehen.
