@@ -50,11 +50,6 @@ static const char *ps3 = "\r\nCookie: PVID=";
 // post_cookie goes here
 static const char *ps4 = "\r\nContent-Type: multipart/form-data; boundary=bOunDaRy"
 	"\r\nContent-Length: 160000\r\n\r\n";
-
-//static char *poststr1 = "POST /upload_data.php HTTP/1.0\r\n"
-//		  "Host: your.hostname.goes.here\r\n"
-//		  "Content-Type: multipart/form-data; boundary=bOunDaRy\r\nContent-Length: 160000\r\n\r\n";
-
 static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
 // post_filename goes here
 static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";

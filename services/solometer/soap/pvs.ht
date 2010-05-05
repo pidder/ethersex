@@ -31,9 +31,12 @@ function evalResponse(text)
     // Get the name of the variable
     aktion = x[i].childNodes[0].nodeName; // GetCalResponse
     // and its value
-    y=x[i].childNodes[0].getElementsByTagName("s-sex");
-    alert("Name: "+y[0].nodeName+"\n"+"Val: "+y[0].nodeValue);
-    wert = y[0].nodeValue; // 0.987
+    y=xmlDoc.getElementsByTagName("s-sex");
+    alert("Return:\n\n"+text);
+    if(y[0].nodeValue != null)
+      wert = y[0].nodeValue; // 0.987
+    else
+      wert = y[0].childNodes[0].nodeValue; // 0.987
     // Set the appropriate fields in the html
     switch(aktion) {
       case "Fault":

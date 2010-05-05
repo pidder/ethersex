@@ -26,19 +26,21 @@
 
 extern uint16_t expected_bytes;
 extern struct pv_serial_buffer pv_recv_buffer;
+const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
 
 void
 wr_read()
 {
-  uint8_t ret, data[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
+
+  uint8_t ret;
   void *p;
 
   //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
   p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
   pv_recv_buffer.len = 0;
-  expected_bytes = (data[4]*0x100+data[5])*2;
+  expected_bytes = (effekta_msg[4]*0x100+effekta_msg[5])*2;
   debug_printf("%d bytes expected.\n",expected_bytes);
-  ret = pv_rxstart(data,8);
+  ret = pv_rxstart(effekta_msg,8);
 }
 
 void

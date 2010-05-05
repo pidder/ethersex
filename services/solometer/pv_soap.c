@@ -101,7 +101,7 @@ uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
   if (len != 0) return 1;	/* we don't want args. */
 
   result->type = SOAP_TYPE_STRING;
-  n = snprintf(s,12,"%.3f",POWER_CAL);
+  n = snprintf(s,16,"%.3f",POWER_CAL);
   result->u.d_string = s;
   return 0;
 }
