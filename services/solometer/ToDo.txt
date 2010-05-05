@@ -4,12 +4,10 @@ solometer-dateien:
 - Webinterface zum Einstellen der Parameter:
   Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
   Keep-raw-files,...
-- Parametrisierung in Ethersex: Upload-URL,Messfrequenz,DHCP ?
-- 'Kennung' zur Individualisierung der einzelnen Solometer
+- Selbst-Reset (Toter-Mann-Knopf)
 
 upload_data.php:
 - alte Raw files löschen
-- Neuen Integrationsalgorithmus für Solardaten
 - Kommentarzeilen in RAW-Files überlesen
 - Falls Datenfiles nicht existieren, neu anlegen 
   und mit Null füllen, sonst ist die Darstellung neuer Anlagen

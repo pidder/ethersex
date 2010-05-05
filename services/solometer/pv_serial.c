@@ -21,7 +21,9 @@
 */
 
 #include <string.h>
+#include <stdio.h>
 #include "services/clock/clock.h"
+#include "protocols/uip/uip.h"
 #include "services/solometer/pv.h"
 
 #define USE_USART 0
@@ -31,21 +33,50 @@
 /* We generate our own usart init module, for our usart port */
 generate_usart_init()
 
+extern char post_hostname[];
+extern char post_cookie[];
+extern uip_ipaddr_t *post_ipaddr;
+extern char post_scriptname[];
+
 struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
 
+#define QUOTEME_(arg) #arg
+#define QUOTEME(arg) QUOTEME_(arg)
+
 void
 pv_init()
 {
+  int n;
   usart_init();
+
+#ifdef PV_WEBHOST_NAME
+  n = snprintf(post_hostname,64,PV_WEBHOST_NAME);
+  debug_printf("Set webhost_name: --%s--\n",post_hostname);
+#endif
+#ifdef PV_WEBHOST_IP
+  int i=0,ip1=0,ip2=0,ip3=0,ip4=0;
+  i = sscanf(PV_WEBHOST_IP,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
+  if(i == 4) {
+    uip_ipaddr(post_ipaddr,ip1,ip2,ip3,ip4);
+    debug_printf("Set webhost_ip to %d.%d.%d.%d\n",ip1,ip2,ip3,ip4);
+  } else {
+    debug_printf("Webhost IP scan failed: n=%d %d %d %d %d\n",i,ip1,ip2,ip3,ip4);
+  }
+#endif
+#ifdef PV_SOLOMETER_ID
+  n = snprintf(post_cookie,12,PV_SOLOMETER_ID);
+#endif
+  n = snprintf(post_scriptname,64,PV_WEBHOST_SCRIPT);
+  debug_printf("Set webhost_script --%s--\n",post_scriptname);
 }
 
 void
 pv_periodic()
 {
   static uint16_t counter = 0;
-  static uint16_t messperiode = 9;
+  static uint16_t messperiode = 50;
   void *p;
 
   if(expected_bytes > 0 && pv_recv_buffer.len >= expected_bytes) {

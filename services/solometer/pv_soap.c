@@ -19,31 +19,16 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+#include <stdlib.h>
 #include "pv.h"
 #include "protocols/soap/soap.h"
 
-float POWER_CAL = 0.987;
+extern char post_hostname[];
+extern char post_scriptname[];
+double POWER_CAL = 1.0;
 int16_t cal;
 
-uint8_t soap_rpc_calfact(uint8_t len, soap_data_t *args, soap_data_t *result)
-{
-  if (len != 0) return 1;	/* we don't want args. */
-
-  result->type = SOAP_TYPE_INT;
-  result->u.d_int = -17;
-  return 0;
-}
-
-uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
-{
-  if (len != 0) return 1;	/* we don't want args. */
-
-  result->type = SOAP_TYPE_INT;
-  result->u.d_int = cal;
-  return 0;
-}
-
-uint8_t soap_rpc_SetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
+uint8_t soap_rpc_Test(uint8_t len, soap_data_t *args, soap_data_t *result)
 {
   uint8_t i;
 
@@ -69,10 +54,89 @@ uint8_t soap_rpc_SetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
   return 0;
 }
 
+uint8_t soap_rpc_SetUplScr(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  int n;
+  if(len != 1 || args[0].type != SOAP_TYPE_STRING) {
+    debug_printf("SetUplScr: len =! 1 or wrong SOAP_TYPE\n");
+    return 1;
+  }
+  n = snprintf(post_scriptname,63,args[0].u.d_string);
+  if(n>0) {
+    result->type = SOAP_TYPE_INT;
+    result->u.d_int = 0;
+  }
+  return 0;
+}
+
+uint8_t soap_rpc_GetUplScr(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  if (len != 0) return 1;	/* we don't want args. */
+
+  result->type = SOAP_TYPE_STRING;
+  result->u.d_string = post_scriptname;
+  return 0;
+}
+
+uint8_t soap_rpc_SetWebHstNm(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  int n;
+  if(len != 1 || args[0].type != SOAP_TYPE_STRING) {
+    debug_printf("SetUplScr: len =! 1 or wrong SOAP_TYPE\n");
+    return 1;
+  }
+  n = snprintf(post_hostname,63,args[0].u.d_string);
+  if(n>0) {
+    result->type = SOAP_TYPE_INT;
+    result->u.d_int = 0;
+  }
+  return 0;
+}
+
+uint8_t soap_rpc_GetWebHstNm(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  if (len != 0) return 1;	/* we don't want args. */
+
+  result->type = SOAP_TYPE_STRING;
+  result->u.d_string = post_hostname;
+  return 0;
+}
+
+uint8_t soap_rpc_SetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  int n;
+  if(len != 1 || args[0].type != SOAP_TYPE_STRING) {
+    debug_printf("SetUplScr: len =! 1 or wrong SOAP_TYPE\n");
+    return 1;
+  }
+  POWER_CAL = atof(args[0].u.d_string);
+  if(POWER_CAL > 0) {
+    result->type = SOAP_TYPE_INT;
+    result->u.d_int = 0;
+  }
+  return 0;
+}
+
+uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  char s[16];
+  int n;
+
+  if (len != 0) return 1;	/* we don't want args. */
+
+  result->type = SOAP_TYPE_STRING;
+  n = snprintf(s,12,"%.3f",POWER_CAL);
+  result->u.d_string = s;
+  return 0;
+}
 
 /*
   -- Ethersex META --
-  soap_rpc(soap_rpc_calfact, "calfact")
+  soap_rpc(soap_rpc_Test, "Test")
   soap_rpc(soap_rpc_GetCal, "GetCal")
   soap_rpc(soap_rpc_SetCal, "SetCal")
+  soap_rpc(soap_rpc_SetUplScr, "SetUplScr")
+  soap_rpc(soap_rpc_GetUplScr, "GetUplScr")
+  soap_rpc(soap_rpc_SetWebHstNm, "SetWebHstNm")
+  soap_rpc(soap_rpc_GetWebHstNm, "GetWebHstNm")
 */

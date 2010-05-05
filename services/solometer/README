@@ -33,3 +33,11 @@ Version 0.1 Anmerkungen:
 - Wählt man Debugging, funktioniert die Kommunikation mit dem WR nicht mehr. Man
   kann dann an die serielle Schnittstelle ein Terminal mit den Einstellungen
   9600/8N1 anschliessen, um die Debug-Meldungen zu sehen.
+
+*** Installation: ***
+In der ethersex-directory:
+  make menuconfig
+  make clean
+  make serversoft
+  make
+Das ethersex.hex file mit dem Programm avrdude flashen.

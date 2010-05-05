@@ -35,15 +35,30 @@ extern uint16_t mwindex;
 MESSWERT sendpuf[MESSPUFSIZE];
 uint16_t spindex = 0;
 
-static char *HOSTNAME = "your.hostname.goes.here";
+char post_hostname[64];
+uip_ipaddr_t *post_ipaddr;
+char post_scriptname[64];
+char post_filename[16] = {'1','2','3','4','5','6','7','8','.','M','C','P',0};
+char post_cookie[16];
+
 static uip_conn_t *post_conn;
-static char *poststr1 = "POST /upload_data.php HTTP/1.0\r\n"
-		  "Host: your.hostname.goes.here\r\n"
-		  "Content-Type: multipart/form-data; boundary=bOunDaRy\r\nContent-Length: 160000\r\n\r\n";
-static char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
-char post_filename[32] = {'1','2','3','4','5','6','7','8','.','M','C','P',0};
-static char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-static char *poststr4 = "\r\n--bOunDaRy\r\n"
+static const char *ps1 = "POST ";
+// post_scriptname goes here
+static const char *ps2 = " HTTP/1.0\r\nHost: ";
+// post_hostname goes here
+static const char *ps3 = "\r\nCookie: PVID=";
+// post_cookie goes here
+static const char *ps4 = "\r\nContent-Type: multipart/form-data; boundary=bOunDaRy"
+	"\r\nContent-Length: 160000\r\n\r\n";
+
+//static char *poststr1 = "POST /upload_data.php HTTP/1.0\r\n"
+//		  "Host: your.hostname.goes.here\r\n"
+//		  "Content-Type: multipart/form-data; boundary=bOunDaRy\r\nContent-Length: 160000\r\n\r\n";
+
+static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
+// post_filename goes here
+static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
+static const char *poststr4 = "\r\n--bOunDaRy\r\n"
 		  "Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
 
 void mcp_net_main()
@@ -74,7 +89,8 @@ void mcp_net_main()
     clock_localtime(&zeit,tmpwert.zeitstempel);
     akt_std = tmpwert.zeitstempel;
     p = uip_sappdata;
-    p += sprintf(p,poststr1);
+    //p += sprintf(p,poststr1);
+    p += sprintf(p,"%s%s%s%s%s%s%s",ps1,post_scriptname,ps2,post_hostname,ps3,post_cookie,ps4);
     post_data.length = p-(char *)uip_sappdata;
     uip_send(uip_sappdata,post_data.length);
     debug_printf("%s",uip_sappdata);
@@ -161,17 +177,21 @@ mcp_net_connect(char *name, uip_ipaddr_t *ipaddr)
 void
 mcp_net_init()
 {
-  uip_ipaddr_t *ip;
+  //uip_ipaddr_t *ip;
 
   // Falls noch keine Verbindung besteht ist post_conn=NULL
   if (! post_conn) {
-    if (! (ip = resolv_lookup(HOSTNAME))) {
+#ifdef DNS_SUPPORT
+    if (! (post_ipaddr = resolv_lookup(post_hostname))) {
       debug_printf("Hostname unknown. Starting Query.\n");
-      resolv_query(HOSTNAME, mcp_net_connect);
+      resolv_query(post_hostname, mcp_net_connect);
     } else {
       debug_printf("Hostname known. Connecting...\n");
-      mcp_net_connect(HOSTNAME, ip);
+      mcp_net_connect(post_hostname, post_ipaddr);
     }
+#else
+    mcp_net_connect("Webhost", post_ipaddr);
+#endif
   }
   return;
 }

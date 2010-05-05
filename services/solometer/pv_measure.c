@@ -35,7 +35,7 @@ void
 messen(uint32_t messwert)
 {
   struct clock_datetime_t zeit;
-  MESSWERT tmpwert;
+  //MESSWERT tmpwert;
   static struct clock_datetime_t zeit_vor = {0,{{0,0,0,0,0}},0};
 
   debug_printf("Messen aufgerufen %lu.\n",messwert);

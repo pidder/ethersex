@@ -1,10 +1,20 @@
 usart_count_used
 if [ "$SOLOMETER_SUPPORT" = y -o $USARTS -gt $USARTS_USED ]; then
-	dep_bool_menu "Photovoltaik-log Support (EXPERIMENTAL)" SOLOMETER_SUPPORT $TCP_SUPPORT $CLOCK_DATETIME_SUPPORT $DNS_SUPPORT $ARCH_AVR $CONFIG_EXPERIMENTAL
-	  dep_bool "Effekta ES3300 Wechselrichter" WR_EFFEKTA $SOLOMETER_SUPPORT
+	dep_bool_menu "Photovoltaik-log Support (EXPERIMENTAL)" SOLOMETER_SUPPORT $TCP_SUPPORT $CLOCK_DATETIME_SUPPORT $ARCH_AVR $CONFIG_EXPERIMENTAL
+	  string "Solometer ID" PV_SOLOMETER_ID "0xj74grolq"
+	  dep_bool "Effekta ES3300 Wechselrichter" PV_WR_EFFEKTA $SOLOMETER_SUPPORT
+	  #if [ $PV_WR_EFFEKTA != "y" ];then
+	  #  dep_bool "SMA Sunny Boy 2100TL Wechselrichter" PV_WR_SMA $SOLOMETER_SUPPORT
+	  #fi
 	  dep_bool "Low RAM usage" PV_CALC_TINY
-	  #dep_bool "SMA Sunny Boy 2100TL Wechselrichter" WR_SMA $SOLOMETER_SUPPORT
-	  #dep_bool "http configuration" SOLOMETER_SOAP_SUPPORT $HTTPD_SOAP_SUPPORT $SOAP_SUPPORT
+	  dep_bool "Solometer config thru httpd" SOLOMETER_SOAP_SUPPORT $HTTPD_SOAP_SUPPORT $SOAP_SUPPORT
+	  if [ $DNS_SUPPORT != "y" ];then
+	    ipv4 "Webhost IP" PV_WEBHOST_IP "123.456.123.456"
+	  else
+	    string "Webhost name" PV_WEBHOST_NAME "your.webhost.name"
+	  fi
+	  string "Path to upload-script" PV_WEBHOST_SCRIPT "/upload_data.php"
+	  int "Keep raw files for days" PV_KEEP_RAW "2"
 	endmenu
 else
 	define_bool SOLOMETER_SUPPORT n

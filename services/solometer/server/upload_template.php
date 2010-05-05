@@ -27,6 +27,28 @@ $month_datei = "months.dat";
 
 $log_datei = "upload_log.html";
 $write_logdatei = 1;
+$KEEP_RAW_FILES = RawFilesKept;
+$ACCEPTED_COOKIE = "MeinKeks";
+
+//returns the content sorted by Filemodificationtime.
+function delete_by_mtime($folder) {
+  $current_time = time();
+  $keep_secs = $KEEP_RAW_FILES * 24 * 3600;
+  $dircontent = scandir($folder);
+  $arr = array();
+  foreach($dircontent as $filename) {
+    if ($filename != '.' && $filename != '..') {
+      if (filemtime($folder.$filename) === false) return false;
+      if($current_time - filemtime($folder.$filename) > $keep_secs) {
+	$pstr .= "Deleting file ".$folder.$filename."<BR>";
+      }
+//      $dat = date("YmdHis", filemtime($folder.$filename));
+//      $arr[$dat] = $filename;
+    }
+  }
+//  if (!ksort($arr)) return false;
+//  return $arr;
+}
 
 // Header and Footer of return page
 $HEAD="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"  \"http://www.w3.org/TR/html4/strict.dtd\">\n<html>\n<head><title>Upload</title></head>\n<body>";
@@ -45,6 +67,7 @@ if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"][
 } else {
   $pstr .= "Error: Invalid file";
 }
+  $pstr .= "Cookie: ".htmlspecialchars($_COOKIE["PVID"]). "<br />";
 
 // Letzte nicht leere Zeile des Tagesfiles einlesen um alte Werte zu ermitteln
 if (file_exists($out_datei)) {
@@ -194,20 +217,7 @@ if((file_exists($out_datei)) && (($fs = filesize($out_datei)) > 0)) {
   fclose($datei);
 }
 
-//returns the content sorted by Filemodificationtime.
-//function scandir_by_mtime($folder) {
-//  $dircontent = scandir($folder);
-//  $arr = array();
-//  foreach($dircontent as $filename) {
-//    if ($filename != '.' && $filename != '..') {
-//      if (filemtime($folder.$filename) === false) return false;
-//      $dat = date("YmdHis", filemtime($folder.$filename));
-//      $arr[$dat] = $filename;
-//    }
-//  }
-//  if (!ksort($arr)) return false;
-//  return $arr;
-//}
+delete_by_mtime($uploadpath);
 
 $pstr .= $FOOT;
 if($write_logdatei > 0) {
