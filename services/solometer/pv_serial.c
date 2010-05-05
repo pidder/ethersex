@@ -42,9 +42,6 @@ struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
 
-#define QUOTEME_(arg) #arg
-#define QUOTEME(arg) QUOTEME_(arg)
-
 void
 pv_init()
 {
@@ -52,7 +49,7 @@ pv_init()
   usart_init();
 
 #ifdef PV_WEBHOST_NAME
-  n = snprintf(post_hostname,64,PV_WEBHOST_NAME);
+  n = snprintf(post_hostname,63,PV_WEBHOST_NAME);
   debug_printf("Set webhost_name: --%s--\n",post_hostname);
 #endif
 #ifdef PV_WEBHOST_IP
@@ -68,7 +65,7 @@ pv_init()
 #ifdef PV_SOLOMETER_ID
   n = snprintf(post_cookie,12,PV_SOLOMETER_ID);
 #endif
-  n = snprintf(post_scriptname,64,PV_WEBHOST_SCRIPT);
+  n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
   debug_printf("Set webhost_script --%s--\n",post_scriptname);
 }
 

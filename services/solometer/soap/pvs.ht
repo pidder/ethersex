@@ -31,7 +31,9 @@ function evalResponse(text)
     // Get the name of the variable
     aktion = x[i].childNodes[0].nodeName; // GetCalResponse
     // and its value
-    wert = x[i].childNodes[0].childNodes[0].childNodes[0].nodeValue; // 0.987
+    y=x[i].childNodes[0].getElementsByTagName("s-sex");
+    alert("Name: "+y[0].nodeName+"\n"+"Val: "+y[0].nodeValue);
+    wert = y[0].nodeValue; // 0.987
     // Set the appropriate fields in the html
     switch(aktion) {
       case "Fault":
@@ -42,15 +44,20 @@ function evalResponse(text)
       case "SetUplScrResponse":
 	if(wert != 0) {
 	  alert("Error setting variable!\n\n" + text);
+	} else {
+	  alert("Set function ok.");
 	}
 	break;
       case "GetCalResponse":
+	alert("Get function ok.");
 	document.SMTCfg.InpPwrCal.value = wert;
 	break;
       case "GetWebHstNmResponse":
+	alert("Get function ok.");
 	document.SMTCfg.InpWebHstNm.value = wert;
 	break;
       case "GetUplScrResponse":
+	alert("Get function ok.");
 	document.SMTCfg.InpUplScr.value = wert;
 	break;
       default:
@@ -102,11 +109,23 @@ function SetCal(form)
   send_message(message);
 }
 
+function GetUplScr()
+{
+  var message = '<GetUplScr xmlns="http://ethersex.de/SOAP">'+'</GetUplScr>';
+  send_message(message);
+}
+
 function SetUplScr(form)
 {
   var scriptname = form.InpUplScr.value
-  var message = '<SetCal xmlns="http://ethersex.de/SOAP">'+
-  '<c-gensym3 xsi:type="xsd:string">'+ scriptname + '</c-gensym3></SetCal>';
+  var message = '<SetUplScr xmlns="http://ethersex.de/SOAP">'+
+  '<c-gensym3 xsi:type="xsd:string">'+ scriptname + '</c-gensym3></SetUplScr>';
+  send_message(message);
+}
+
+function GetWebHstNm()
+{
+  var message = '<GetWebHstNm xmlns="http://ethersex.de/SOAP">'+'</GetWebHstNm>';
   send_message(message);
 }
 

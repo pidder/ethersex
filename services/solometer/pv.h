@@ -56,7 +56,7 @@ uint8_t pv_rxstart(uint8_t*, uint8_t);
 // From pv_inet
 void post_file(void);
 
-#define PV_SERIAL_BUFFER_LEN 64
+#define PV_SERIAL_BUFFER_LEN 48
 
 struct pv_serial_buffer {
   uint8_t len;

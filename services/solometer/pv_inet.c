@@ -60,13 +60,13 @@ static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; nam
 static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
 static const char *poststr4 = "\r\n--bOunDaRy\r\n"
 		  "Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
+static char puffer[32];
 
 void mcp_net_main()
 {
   char *p;
   static uint16_t rbp = 0,j;
   static uint32_t akt_std;
-  static char puffer[32];
   MESSWERT tmpwert;
   struct clock_datetime_t zeit;
 
@@ -90,7 +90,10 @@ void mcp_net_main()
     akt_std = tmpwert.zeitstempel;
     p = uip_sappdata;
     //p += sprintf(p,poststr1);
-    p += sprintf(p,"%s%s%s%s%s%s%s",ps1,post_scriptname,ps2,post_hostname,ps3,post_cookie,ps4);
+    p += sprintf(p,"%s%s",ps1,post_scriptname);
+    p += sprintf(p,"%s%s",ps2,post_hostname);
+    p += sprintf(p,"%s%s",ps3,post_cookie);
+    p += sprintf(p,"%s",ps4);
     post_data.length = p-(char *)uip_sappdata;
     uip_send(uip_sappdata,post_data.length);
     debug_printf("%s",uip_sappdata);
