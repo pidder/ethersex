@@ -66,6 +66,7 @@ messen(uint32_t messwert)
   }
 
 #ifndef PV_CALC_TINY
+  MESSWERT tmpwert;
   // Das ist der Messwert
   messpuf[mwindex].wert1 = messwert;
   // Pufferzähler eins hoch
