@@ -1,0 +1,1 @@
+ifdef(`conf_SOLOMETER_SOAP', `', `m4exit(1)')dnl

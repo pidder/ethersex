@@ -55,11 +55,11 @@ static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; nam
 static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
 static const char *poststr4 = "\r\n--bOunDaRy\r\n"
 		  "Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
-static char puffer[32];
 
 void mcp_net_main()
 {
   char *p;
+  static char puffer[32];
   static uint16_t rbp = 0,j;
   static uint32_t akt_std;
   MESSWERT tmpwert;

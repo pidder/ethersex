@@ -1,5 +1,10 @@
-solometer-dateien:
+Allgemein
+- Selbst-Reset (Toter-Mann-Knopf)
+- Daten zusätzlich auf SD-Karte speichern
+
+Solometer-Dateien:
 - Fehlermeldungen des WR mitsenden
+- DC-Spannung und Strom mitsenden
 - Bessere Reaktion auf Timeouts
 - Webinterface zum Einstellen der Parameter:
   Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
@@ -16,3 +21,6 @@ upload_data.php:
 server/solometer.js:
 - wbox besser positionieren
 - Daten in wbox tabellarisch listen
+- Tiptool DC-Spannung, DC-Strom der beiden Tracker
+
+Test am ES-5000

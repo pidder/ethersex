@@ -26,7 +26,6 @@
 extern char post_hostname[];
 extern char post_scriptname[];
 double POWER_CAL = 1.0;
-int16_t cal;
 
 uint8_t soap_rpc_SetUplScr(uint8_t len, soap_data_t *args, soap_data_t *result)
 {

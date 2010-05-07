@@ -26,12 +26,11 @@
 
 extern uint16_t expected_bytes;
 extern struct pv_serial_buffer pv_recv_buffer;
-const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
 
 void
 wr_read()
 {
-
+  const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
   uint8_t ret;
   void *p;
 
