@@ -37,7 +37,7 @@ typedef struct {
 #define MESSPUFSIZE 1
 #endif //PV_CALC_TINY
 
-#define POST_EVERY_MINS 2
+#define POST_EVERY_MINS 5
 
 // Function prototypes
 

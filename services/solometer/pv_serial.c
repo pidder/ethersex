@@ -76,7 +76,7 @@ void
 pv_periodic()
 {
   static uint16_t counter = 0;
-  static uint16_t messperiode = 50;
+  static uint16_t messperiode = 9;
   void *p;
 
   if(expected_bytes > 0 && pv_recv_buffer.len >= expected_bytes) {
