@@ -1,26 +1,28 @@
-Allgemein
+Allgemeine features
 - Selbst-Reset (Toter-Mann-Knopf)
 - Daten zusätzlich auf SD-Karte speichern
 
 Solometer-Dateien:
 - Fehlermeldungen des WR mitsenden
 - DC-Spannung und Strom mitsenden
-- Bessere Reaktion auf Timeouts
+- Bessere Reaktion auf Timeouts->Web debug
 - Webinterface zum Einstellen der Parameter:
   Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
   Keep-raw-files,...
-- Selbst-Reset (Toter-Mann-Knopf)
 
 upload_data.php:
 - alte Raw files löschen
+- Cookies prüfen
 - Kommentarzeilen in RAW-Files überlesen
-- Falls Datenfiles nicht existieren, neu anlegen 
-  und mit Null füllen, sonst ist die Darstellung neuer Anlagen
-  scheusslich.
+- Akzeptieren versch. files (days_hist.dat,*.log)
+- Akzeptiere versch. IDs ->Filename
 
 server/solometer.js:
 - wbox besser positionieren
 - Daten in wbox tabellarisch listen
 - Tiptool DC-Spannung, DC-Strom der beiden Tracker
+- Window-resize
 
+Zu tun, Bugs
 Test am ES-5000
+Web-debug! Setzen der IP.

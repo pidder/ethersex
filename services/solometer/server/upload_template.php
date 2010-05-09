@@ -30,24 +30,22 @@ $write_logdatei = 1;
 $KEEP_RAW_FILES = RawFilesKept;
 $ACCEPTED_COOKIE = "MeinKeks";
 
-//returns the content sorted by Filemodificationtime.
-function delete_by_mtime($folder) {
+function cleanup($dirname,$keep_secs)
+{
   $current_time = time();
-  $keep_secs = $KEEP_RAW_FILES * 24 * 3600;
-  $dircontent = scandir($folder);
-  $arr = array();
+  $dircontent = scandir($dirname);
   foreach($dircontent as $filename) {
     if ($filename != '.' && $filename != '..') {
-      if (filemtime($folder.$filename) === false) return false;
-      if($current_time - filemtime($folder.$filename) > $keep_secs) {
-	$pstr .= "Deleting file ".$folder.$filename."<BR>";
+      $arr = explode(".",$filename);
+      if($current_time - hexdec($arr[0]) > $keep_secs) {
+	$pstr .= "Deleting ".$filename.".<BR>";
+	unlink($dirname.$filename);
+      } else {
+	$pstr .= $filename." not deleted.<BR>";
       }
-//      $dat = date("YmdHis", filemtime($folder.$filename));
-//      $arr[$dat] = $filename;
     }
   }
-//  if (!ksort($arr)) return false;
-//  return $arr;
+  return $pstr;
 }
 
 // Header and Footer of return page
@@ -217,7 +215,8 @@ if((file_exists($out_datei)) && (($fs = filesize($out_datei)) > 0)) {
   fclose($datei);
 }
 
-delete_by_mtime($uploadpath);
+// Delete old raw files
+$pstr .= cleanup($uploadpath,$KEEP_RAW_FILES*24*3600);
 
 $pstr .= $FOOT;
 if($write_logdatei > 0) {

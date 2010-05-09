@@ -56,14 +56,16 @@ messen(uint32_t messwert)
   // Uhrzeit nicht aktuell (Läuft der NTP daemon nicht?)
   if(zeit.year < 110) {
     debug_printf("Uhr nicht gestellt.\n");
+#ifndef SOLOMETER_WEB_DEBUG
     return;
+#endif
   }
-
+#ifndef SOLOMETER_WEB_DEBUG
   // Erster Durchlauf: Zeit_vor initialisieren.
   if(zeit_vor.year < 110) {
     zeit_vor = zeit;
-    messpuf[0].wert1 = 0;
   }
+#endif
 
 #ifndef PV_CALC_TINY
   MESSWERT tmpwert;
@@ -73,6 +75,7 @@ messen(uint32_t messwert)
   mwindex++;
 
   // Am Ende der Messperiode Werte abspeichern
+  debug_printf("Zeit.min: %d, Zeit_vor.min: %d\n",zeit.min,zeit_vor.min);
   if(!(zeit.min % POST_EVERY_MINS) && zeit.min != zeit_vor.min) {
     debug_printf("\nMessperiode beendet.\n");
     // Index eins zurück
@@ -99,6 +102,7 @@ messen(uint32_t messwert)
   //debug_printf("Nach:Summe %lu Index %u.\n",messpuf[0].wert1,mwindex);
 
   // Am Ende der Messperiode Werte abspeichern
+  debug_printf("Zeit.min: %d, Zeit_vor.min: %d\n",zeit.min,zeit_vor.min);
   if(!(zeit.min % POST_EVERY_MINS) && zeit.min != zeit_vor.min) {
     debug_printf("\nMessperiode beendet.\n");
     // Index eins zurück

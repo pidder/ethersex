@@ -15,6 +15,7 @@ if [ "$SOLOMETER_SUPPORT" = y -o $USARTS -gt $USARTS_USED ]; then
 	  fi
 	  string "Path to upload-script" PV_WEBHOST_SCRIPT "/upload_data.php"
 	  int "Keep raw files for days" PV_KEEP_RAW "2"
+	  dep_bool "Web debugging" SOLOMETER_WEB_DEBUG
 	endmenu
 else
 	define_bool SOLOMETER_SUPPORT n
