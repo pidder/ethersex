@@ -28,7 +28,11 @@ $month_datei = "months.dat";
 $log_datei = "upload_log.html";
 $write_logdatei = 1;
 $KEEP_RAW_FILES = RawFilesKept;
-$ACCEPTED_COOKIE = "MeinKeks";
+//$ACCEPTED_COOKIE = "MeinKeks";
+$ACCEPTED_COOKIES = array(
+  // "nutg76f8lo" => "SMA Sunny Boy2100TL",
+  "MeinKeks" => "Effekta ES3300"
+  );
 
 function cleanup($dirname,$keep_secs)
 {
@@ -53,6 +57,24 @@ $HEAD="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"  \"http://www.w3.org/
 $FOOT="</body></html>";
 // Return string
 $pstr .= $HEAD;
+
+$cookie = htmlspecialchars($_COOKIE["PVID"]);
+//$pstr .= "Cookie: ".$cookie. "<br />";
+$ac = array_keys($ACCEPTED_COOKIES);
+$k = array_search($cookie,$ac);
+if($k === FALSE) {
+  $pstr .= "Wrong Cookie: ".$cookie."<BR>";
+  $pstr .= $FOOT;
+  if($write_logdatei > 0) {
+    $datei = fopen ($log_datei, "w");
+    fputs($datei,$pstr);
+    fclose($datei);
+  }
+  return $pstr;
+} else {
+  $pstr .= "Cookie ".$cookie." found at position ".$k."<BR>";
+}
+
 // File upload
 if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"]["size"] < 20000)) {
 
@@ -65,7 +87,6 @@ if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"][
 } else {
   $pstr .= "Error: Invalid file";
 }
-  $pstr .= "Cookie: ".htmlspecialchars($_COOKIE["PVID"]). "<br />";
 
 // Letzte nicht leere Zeile des Tagesfiles einlesen um alte Werte zu ermitteln
 if (file_exists($out_datei)) {
@@ -105,7 +126,7 @@ if ($datei = fopen ( $in_datei, "r")) {
       if(strlen($datum) < 1) {
 	$pstr .= "<br/>Erster Schleifendurchlauf";
 	// Falls Tagesfile existiert und Tag des geposteten Files != Tag des Datenfiles
-	$pstr .= sprintf("<br/>Tag ex. File:%d, Tag neue daten: %d",$md[0],$a[0][0]);
+	$pstr .= sprintf("<br/>Tag ex. File:%d, Tag neue daten: %d <br>",$md[0],$a[0][0]);
 	if(($md[0] != 0) && ($a[0][0] != $md[0])) {
 	  if(file_exists($out_datei)) {
 	    $log_datei = "upload_log_newday.html";

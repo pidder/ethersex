@@ -11,8 +11,6 @@ Solometer-Dateien:
   Keep-raw-files,...
 
 upload_data.php:
-- alte Raw files löschen
-- Cookies prüfen
 - Kommentarzeilen in RAW-Files überlesen
 - Akzeptieren versch. files (days_hist.dat,*.log)
 - Akzeptiere versch. IDs ->Filename
