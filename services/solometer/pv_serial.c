@@ -35,17 +35,19 @@ generate_usart_init()
 
 extern char post_hostname[];
 extern char post_cookie[];
-extern uip_ipaddr_t *post_ipaddr;
+extern uip_ipaddr_t post_ipaddr;
 extern char post_scriptname[];
 
 struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
+static int ip1,ip2,ip3,ip4;
 
 void
 pv_init()
 {
   int n;
+
   usart_init();
 
 #ifdef PV_WEBHOST_NAME
@@ -53,16 +55,13 @@ pv_init()
   debug_printf("Set webhost_name: --%s--\n",post_hostname);
 #endif //PV_WEBHOST_NAME
 #ifdef PV_WEBHOST_IP
-  int i,ip1,ip2,ip3,ip4;
-  i=4;ip1=192;ip2=168;ip3=0;ip4=1;
-  debug_printf(PV_WEBHOST_IP);
-  //i = sscanf(PV_WEBHOST_IP,"%u.%u.%u.%u",&ip1,&ip2,&ip3,&ip4);
-  if(i == 4) {
-    //ip1 &= 0xff; ip2 &= 0xff; ip3 &= 0xff; ip4 &= 0xff;
-    uip_ipaddr(post_ipaddr,ip1,ip2,ip3,ip4);
+  debug_printf(PV_WEBHOST_IP "\n");
+  n = sscanf(PV_WEBHOST_IP,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
+  if(n == 4) {
+    uip_ipaddr(&post_ipaddr,ip1,ip2,ip3,ip4);
     debug_printf("Set webhost_ip to %d.%d.%d.%d\n",ip1,ip2,ip3,ip4);
   } else {
-    debug_printf("Webhost IP scan failed: n=%u %u %u %u %u\n",i,ip1,ip2,ip3,ip4);
+    debug_printf("Webhost IP scan failed: n=%d %d %d %d %d\n",n,ip1,ip2,ip3,ip4);
   }
 #endif //PV_WEBHOST_IP
 #ifdef PV_SOLOMETER_ID
