@@ -140,37 +140,18 @@ function SetWebHstNm(form)
   send_message(message);
 }
 
-function TestItAll(form)
+function GetCookie()
 {
-  var text = form.InpTestItAll.value
+  var message = '<GetCookie xmlns="http://ethersex.de/SOAP">'+'</GetCookie>';
+  send_message(message);
+}
 
-  if (window.DOMParser) {
-    parser=new DOMParser();
-    xmlDoc=parser.parseFromString(text,"text/xml");
-  } else { // Internet Explorer
-    xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
-    xmlDoc.async="false";
-    xmlDoc.loadXML(text);
-  }
-  //document.write("XML string is loaded into an XML DOM Object");
-  x=xmlDoc.getElementsByTagName("soap:Body");
-  for (i=0;i<x.length;i++) {
-    aktion = x[i].childNodes[0].nodeName; // GetCalResponse
-    wert = x[i].childNodes[0].childNodes[0].childNodes[0].nodeValue; // 0.987
-    switch(aktion) {
-      case "GetCalResponse":
-	document.SMTCfg.InpPwrCal.value = wert;
-	break;
-      case "GetWebHstNmResponse":
-	document.SMTCfg.InpWebHstNm.value = wert;
-	break;
-      case "GetUplScrResponse":
-	document.SMTCfg.InpUplScr.value = wert;
-	break;
-      default:
-	break;
-    }
-  }
+function SetCookie(form)
+{
+  var scriptname = form.InpCookie.value
+  var message = '<SetCookie xmlns="http://ethersex.de/SOAP">'+
+  '<c-gensym3 xsi:type="xsd:string">'+ scriptname + '</c-gensym3></SetCookie>';
+  send_message(message);
 }
 </script>
 </head>
@@ -196,6 +177,15 @@ function TestItAll(form)
     <input type="button" value="Holen" onclick="GetWebHstNm();" />
     <input type="button" value="Setzen" onclick="SetWebHstNm(this.form);" />
 		
+    <hr />
+
+    <h2>Solometer Kennung</h2>
+    <p></p> 
+    <label for="txtCookie">Kennung: </label>
+    <input type="text" name="InpCookie" id="InpCookie" value="" /><BR>
+    <input type="button" value="Holen" onclick="GetCookie();" />
+    <input type="button" value="Setzen" onclick="SetCookie(this.form);" />
+
     <hr />
 
     <h2>Name des upload-scripts</h2>

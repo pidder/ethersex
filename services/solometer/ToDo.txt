@@ -5,22 +5,20 @@ Allgemeine features
 Solometer-Dateien:
 - Fehlermeldungen des WR mitsenden
 - DC-Spannung und Strom mitsenden
-- Bessere Reaktion auf Timeouts->Web debug
+- Bessere Reaktion auf Timeouts ->Selbst-Reset
 - Webinterface zum Einstellen der Parameter:
   Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
   Keep-raw-files,...
 
 upload_data.php:
 - Kommentarzeilen in RAW-Files überlesen
-- Akzeptieren versch. files (days_hist.dat,*.log)
+- Akzeptieren versch. files (day.dat, days_hist.dat, *.log)
 - Akzeptiere versch. IDs ->Filename
+- eigene sparsame Web-Konfiguration
 
 server/solometer.js:
 - wbox besser positionieren
-- Daten in wbox tabellarisch listen
 - Tiptool DC-Spannung, DC-Strom der beiden Tracker
-- Window-resize
 
-Zu tun, Bugs
+Zu tun:
 Test am ES-5000
-Web-debug! Setzen der IP.

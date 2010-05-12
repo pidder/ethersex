@@ -25,6 +25,7 @@
 
 extern char post_hostname[];
 extern char post_scriptname[];
+extern char post_cookie[];
 double POWER_CAL = 1.0;
 
 uint8_t soap_rpc_SetUplScr(uint8_t len, soap_data_t *args, soap_data_t *result)
@@ -94,14 +95,40 @@ uint8_t soap_rpc_SetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
 
 uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
 {
-  char s[16];
+  static char s[12];
   int n;
 
   if (len != 0) return 1;	/* we don't want args. */
 
   result->type = SOAP_TYPE_STRING;
-  n = snprintf(s,16,"%.3f",POWER_CAL);
+  n = snprintf(s,10,"%.3f",POWER_CAL);
   result->u.d_string = s;
+  return 0;
+}
+
+uint8_t soap_rpc_SetCookie(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  int n;
+  if(len != 1 || args[0].type != SOAP_TYPE_STRING) {
+    debug_printf("SetUplScr: len =! 1 or wrong SOAP_TYPE\n");
+    return 1;
+  }
+  debug_printf("pv_soap: args[0].u.d_string: --%s--\n",args[0].u.d_string);
+  n = snprintf(post_cookie,12,args[0].u.d_string);
+  if(n>0) {
+    result->type = SOAP_TYPE_INT;
+    result->u.d_int = 0;
+  }
+  debug_printf("pv_soap: post_cookie set: --%s--\n",post_cookie);
+  return 0;
+}
+
+uint8_t soap_rpc_GetCookie(uint8_t len, soap_data_t *args, soap_data_t *result)
+{
+  if (len != 0) return 1;	/* we don't want args. */
+
+  result->type = SOAP_TYPE_STRING;
+  result->u.d_string = post_cookie;
   return 0;
 }
 
@@ -113,4 +140,6 @@ uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
   soap_rpc(soap_rpc_GetUplScr, "GetUplScr")
   soap_rpc(soap_rpc_SetWebHstNm, "SetWebHstNm")
   soap_rpc(soap_rpc_GetWebHstNm, "GetWebHstNm")
+  soap_rpc(soap_rpc_SetCookie, "SetCookie")
+  soap_rpc(soap_rpc_GetCookie, "GetCookie")
 */
