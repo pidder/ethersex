@@ -22,6 +22,7 @@
 #include "httpd.h"
 
 extern char solometer_cfg[];
+char text[12];
 
 void
 httpd_handle_solometer (void)
@@ -34,4 +35,9 @@ httpd_handle_solometer (void)
   if(i>0)
     debug_printf("Solometer config: %s\n",solometer_cfg);
 
+  i = sscanf(solometer_cfg,"PVID=%10s&",text);
+  text[11] = 0;
+  if(i > 0) {
+    debug_printf("Parsed PVID: --%s--\n",text);
+  }
 }
