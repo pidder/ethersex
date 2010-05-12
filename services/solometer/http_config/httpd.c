@@ -39,6 +39,8 @@
 # define printf(...)   ((void)0)
 #endif
 
+#define SOLOMETER_CFG_LEN 64
+char solometer_cfg[SOLOMETER_CFG_LEN];
 
 void
 httpd_init(void)
@@ -46,8 +48,6 @@ httpd_init(void)
     uip_listen(HTONS(HTTPD_PORT), httpd_main);
     uip_listen(HTONS(HTTPD_ALTERNATE_PORT), httpd_main);
 }
-
-
 
 void
 httpd_cleanup (void)
@@ -59,6 +59,7 @@ static void
 httpd_handle_input (void)
 {
     char *ptr = (char *) uip_appdata;
+    int16_t l;
 
     if (uip_len < 10) {
 	printf ("httpd: received request to short (%d bytes).\n", uip_len);
@@ -88,7 +89,21 @@ httpd_handle_input (void)
      * possibly check authentication.
      */
 
-    //Handle solometer config request here
+    //Handle solometer page and config request here
+    // filename must be 'solometer[?...]'
+    if(strncmp(filename,"solometer",9) == 0) {
+      filename += 9;
+      l = strnlen(filename,SOLOMETER_CFG_LEN);
+      if(l > 4 && l < SOLOMETER_CFG_LEN && *filename == '?') {
+	// This a set operation. Evaluate parameters.
+	strncpy(solometer_cfg,filename,SOLOMETER_CFG_LEN);
+	solometer_cfg[63] = 0;
+      } else {
+	// This is a page request. Deliver Page.
+	solometer_cfg[0] = 0;
+      }
+      STATE->handler = httpd_handle_solometer;
+    }
 
     /* Fallback, send 404. */
     STATE->handler = httpd_handle_404;
