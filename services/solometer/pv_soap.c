@@ -36,6 +36,7 @@ uint8_t soap_rpc_SetUplScr(uint8_t len, soap_data_t *args, soap_data_t *result)
     return 1;
   }
   n = snprintf(post_scriptname,63,args[0].u.d_string);
+  post_scriptname[63] = 0;
   if(n>0) {
     result->type = SOAP_TYPE_INT;
     result->u.d_int = 0;
@@ -61,6 +62,7 @@ uint8_t soap_rpc_SetWebHstNm(uint8_t len, soap_data_t *args, soap_data_t *result
   }
   debug_printf("pv_soap: args[0].u.d_string: --%s--\n",args[0].u.d_string);
   n = snprintf(post_hostname,63,args[0].u.d_string);
+  post_hostname[63] = 0;  
   if(n>0) {
     result->type = SOAP_TYPE_INT;
     result->u.d_int = 0;
@@ -102,6 +104,7 @@ uint8_t soap_rpc_GetCal(uint8_t len, soap_data_t *args, soap_data_t *result)
 
   result->type = SOAP_TYPE_STRING;
   n = snprintf(s,10,"%.3f",POWER_CAL);
+  s[11] = 0;
   result->u.d_string = s;
   return 0;
 }
