@@ -69,6 +69,10 @@ pv_init()
 #endif
   n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
   debug_printf("Set webhost_script --%s--\n",post_scriptname);
+
+#ifdef SOLOMETER_HTTP_CONFIG
+  httpd_init();
+#endif
 }
 
 void
