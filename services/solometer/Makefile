@@ -6,7 +6,7 @@ $(SOLOMETER_SUPPORT)_SRC += services/solometer/pv_inet.c
 $(SOLOMETER_SUPPORT)_SRC += services/solometer/pv_measure.c
 $(PV_WR_EFFEKTA)_SRC += services/solometer/pv_effekta.c
 $(PV_WR_SMA)_SRC += services/solometer/pv_sma.c
-$(SOLOMETER_HTTP_CONFIG)_SRC += services/solometer/http_config/handle_solometer.c services/solometer/http_config/headers.c services/solometer/http_config/handle_404.c services/solometer/http_config/handle_400.c services/solometer/http_config/httpd.c
+$(SOLOMETER_HTTP_CONFIG)_SRC += services/solometer/http_config/handle_solometer.c
 
 #services/solometer/server/upload_data.php : $(TOPDIR)/.config
 serversoft:

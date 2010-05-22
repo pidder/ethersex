@@ -7,7 +7,7 @@ if [ "$SOLOMETER_SUPPORT" = y -o $USARTS -gt $USARTS_USED ]; then
 	  #  dep_bool "SMA Sunny Boy 2100TL Wechselrichter" PV_WR_SMA $SOLOMETER_SUPPORT
 	  #fi
 	  dep_bool "Low RAM usage" PV_CALC_TINY
-	  dep_bool "Solometer HTTP config" SOLOMETER_HTTP_CONFIG
+	  dep_bool "Solometer HTTP config" SOLOMETER_HTTP_CONFIG $HTTPD_SUPPORT
 	  if [ $DNS_SUPPORT != "y" ];then
 	    ipv4 "Webhost IP" PV_WEBHOST_IP "123.456.123.456"
 	  else

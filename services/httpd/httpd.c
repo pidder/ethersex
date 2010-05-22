@@ -40,6 +40,10 @@
 # define printf(...)   ((void)0)
 #endif
 
+#ifdef SOLOMETER_HTTP_CONFIG
+#define SOLOMETER_CFG_LEN 32
+char solometer_cfg[SOLOMETER_CFG_LEN];
+#endif
 
 void
 httpd_init(void)
@@ -273,11 +277,34 @@ after_auth:
     }
 #endif	/* HTTP_SD_DIR_SUPPORT */
 
-    /* Fallback, send 404. */
+#ifdef SOLOMETER_HTTP_CONFIG
+    //Handle solometer page and config request here
+    // filename must be 'solometer[?...]'
+    int l;
+    l = strncmp(filename,"solometer",9);
+    debug_printf("l: %d\n",l);
+    if(l <= 0) {
+      debug_printf("String solometer found.\n");
+      filename += 9;
+      l = strnlen(filename,SOLOMETER_CFG_LEN);
+      debug_printf("length: %d\n",l);
+      if(l > 4 && l < SOLOMETER_CFG_LEN && *filename == '?') {
+	// This a set operation. Evaluate parameters.
+	strncpy(solometer_cfg,filename,SOLOMETER_CFG_LEN);
+	solometer_cfg[SOLOMETER_CFG_LEN - 1] = 0;
+      } else {
+	// This is a page request. Deliver Page.
+	solometer_cfg[0] = 0;
+      }
+      STATE->handler = httpd_handle_solometer;
+    } else {
+      debug_printf("String solometer not found.\n");
+    }
+#endif
+
+/* Fallback, send 404. */
     STATE->handler = httpd_handle_404;
 }
-
-
 
 void
 httpd_main(void)
