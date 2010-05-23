@@ -21,23 +21,65 @@
 #include "config.h"
 #include "httpd.h"
 
-extern char solometer_cfg[];
-char text[12];
+const char page_header[] = "HTTP/1.1 200 OK\n"
+"Host: solometer.local\n"
+"Content-Length: 1000\n"
+"Content-Type: text/html; charset=utf-8\n\n"
+"<html>\n<head>\n"
+"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
+"<title>SOLOMETER CONFIGURATION</title>\n"
+"</head>\n<body>\n"
+"Hello World!"
+"\n</BODY>\n</HTML>\n";
+
+char PROGMEM httpd_header_500_smt[] =
+"HTTP/1.1 500 Server Error\n"
+"Connection: close\n";
+
+int
+solometer_parse (char* ptr)
+{
+  debug_printf("String to parse: --%s--\n",ptr);
+  return 0;
+}
 
 void
 httpd_handle_solometer (void)
 {
-  int i;
+  int i = 0;
 
-  i = strlen(solometer_cfg);
-  debug_printf("Solometer config: strlen = %d\n",i);
+  if (uip_newdata()) {
+    /* We've received new data (maybe even the first time).  We'll
+      receive something like this:
+      GET /solometer[?...]
 
-  if(i>0)
-    debug_printf("Solometer config: %s\n",solometer_cfg);
+    /* Make sure it's zero-terminated, so we can safely use strstr */
+    char *ptr = (char *)uip_appdata;
+    ptr[uip_len] = 0;
 
-  i = sscanf(solometer_cfg,"PVID=%10s&",text);
-  text[11] = 0;
-  if(i > 0) {
-    debug_printf("Parsed PVID: --%s--\n",text);
+    debug_printf("Newdata: ---------\n%s\n-----------",ptr);
+
+    ptr = strstr_P (ptr, PSTR("?")) + 1;
+    if(!ptr || *ptr == 0) {
+      debug_printf("This is a request only. Send page.\n");
+      i = 0;
+    } else {
+	debug_printf("This is a set operation. Parsing...\n");
+	i = solometer_parse(ptr);
+    }
   }
+
+  if (uip_acked ()) {
+    uip_close ();
+    return;
+  }
+
+  PASTE_RESET ();
+  if(i) {
+    PASTE_P (httpd_header_500_smt);
+  } else {
+    PASTE_P (page_header);
+  }
+  PASTE_SEND ();
+
 }
