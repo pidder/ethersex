@@ -101,6 +101,16 @@ httpd_handle_input (void)
     }
 #endif	/* HTTPD_SOAP_SUPPORT */
 
+#ifdef SOLOMETER_HTTP_CONFIG
+    //Handle solometer page and config request here
+    // filename must be 'solometer[?...]'
+    if(strncasecmp_P (uip_appdata, PSTR ("GET /solometer"),14) == 0) {
+      debug_printf("String solometer found.\n");
+      STATE->handler = httpd_handle_solometer;
+      return;
+    }
+#endif  /* SOLOMETER_HTTP_CONFIG */
+
     if (strncasecmp_P (uip_appdata, PSTR ("GET /"), 5)) {
 	printf ("httpd: received request is not GET.\n");
 	STATE->handler = httpd_handle_400;
@@ -269,16 +279,6 @@ after_auth:
 	return;
     }
 #endif	/* HTTP_SD_DIR_SUPPORT */
-
-#ifdef SOLOMETER_HTTP_CONFIG
-    //Handle solometer page and config request here
-    // filename must be 'solometer[?...]'
-    if(strncmp(filename,"solometer",9) == 0) {
-      debug_printf("String solometer found.\n");
-      STATE->handler = httpd_handle_solometer;
-      return;
-    }
-#endif  /* SOLOMETER_HTTP_CONFIG */
 
 /* Fallback, send 404. */
     STATE->handler = httpd_handle_404;

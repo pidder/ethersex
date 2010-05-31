@@ -18,10 +18,11 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+#include "services/httpd/base64.h"
 #include "config.h"
-#include "httpd.h"
+#include "services/httpd/httpd.h"
 
-const char page_header[] = "HTTP/1.1 200 OK\n"
+char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
 "Content-Length: 1000\n"
 "Content-Type: text/html; charset=utf-8\n\n"
@@ -29,17 +30,79 @@ const char page_header[] = "HTTP/1.1 200 OK\n"
 "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
 "<title>SOLOMETER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
-"Hello World!"
-"\n</BODY>\n</HTML>\n";
+"<form action=\"http://192.168.178.201/solometer\" method=\"get\" accept-charset=\"utf-8\">"
+"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>"
+"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
+"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
+"  <input type=\"submit\" value=\" Absenden \">"
+"</form>"
+"</BODY>\n</HTML>\n";
 
 char PROGMEM httpd_header_500_smt[] =
 "HTTP/1.1 500 Server Error\n"
 "Connection: close\n";
 
+extern char post_hostname[], post_scriptname[], post_cookie[];
+
 int
 solometer_parse (char* ptr)
 {
+  char *ptr1,*ptr2,c;
+  
+  //base64_str_decode(ptr);
+  ptr1 = strchr (ptr, ' ');
+  if (ptr1 == NULL) {
+    printf ("smt_parse: space after filename not found.\n");
+    return -1;
+  }
+  *ptr1 = 0;
+
   debug_printf("String to parse: --%s--\n",ptr);
+  
+  ptr1 = strstr(ptr,"ID=");
+  if(ptr1 != NULL) {
+    ptr1 += 3;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(post_cookie,ptr1,10);
+      *ptr2 = c;
+      post_cookie[10] = 0;
+    }
+  }
+
+  debug_printf("Ausgewertet:PVID=--%s--\n",post_cookie);
+  
+  ptr1 = strstr(ptr,"HST=");
+  if(ptr1 != NULL) {
+    ptr1 += 4;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(post_hostname,ptr1,63);
+      *ptr2 = c;
+      post_hostname[63] = 0;
+    }
+  }
+
+  debug_printf("Ausgewertet:HST=--%s--\n",post_hostname);
+  
+  ptr1 = strstr(ptr,"SCR=");
+  if(ptr1 != NULL) {
+    ptr1 += 4;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(post_scriptname,ptr1,63);
+      *ptr2 = c;
+      post_scriptname[63] = 0;
+    }
+  }
+
+  debug_printf("Ausgewertet:SCRPT=--%s--\n",post_scriptname);
   return 0;
 }
 
@@ -48,6 +111,7 @@ httpd_handle_solometer (void)
 {
   int i = 0;
 
+  debug_printf("Handle_solometer called.\n");
   if (uip_newdata()) {
     /* We've received new data (maybe even the first time).  We'll
       receive something like this:
