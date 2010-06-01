@@ -54,7 +54,7 @@ static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; nam
 // post_filename goes here
 static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
 static const char *poststr4 = "\r\n--bOunDaRy\r\n"
-		  "Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
+	"Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
 
 void mcp_net_main()
 {

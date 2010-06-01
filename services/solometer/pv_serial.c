@@ -25,6 +25,7 @@
 #include "services/clock/clock.h"
 #include "protocols/uip/uip.h"
 #include "services/solometer/pv.h"
+#include "core/eeprom.h"
 
 #define USE_USART 0
 #define BAUD 9600
@@ -51,7 +52,9 @@ pv_init()
   usart_init();
 
 #ifdef PV_WEBHOST_NAME
-  n = snprintf(post_hostname,63,PV_WEBHOST_NAME);
+  memset(post_hostname,0,64);
+  eeprom_restore(solometer_host, post_hostname, 64);
+  //n = snprintf(post_hostname,63,PV_WEBHOST_NAME);
   debug_printf("Set webhost_name: --%s--\n",post_hostname);
 #endif //PV_WEBHOST_NAME
 #ifdef PV_WEBHOST_IP
@@ -69,6 +72,7 @@ pv_init()
 #endif
   n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
   debug_printf("Set webhost_script --%s--\n",post_scriptname);
+
 }
 
 void
