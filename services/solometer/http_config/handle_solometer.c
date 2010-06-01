@@ -17,10 +17,10 @@
  * For more information on the GPL, please go to:
  * http://www.gnu.org/copyleft/gpl.html
  */
-
-#include "services/httpd/base64.h"
 #include "config.h"
 #include "services/httpd/httpd.h"
+#include <ctype.h>
+#include "core/eeprom.h"
 
 char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
@@ -43,13 +43,76 @@ char PROGMEM httpd_header_500_smt[] =
 "Connection: close\n";
 
 extern char post_hostname[], post_scriptname[], post_cookie[];
+static int *in, c, c1, c2;
+
+void next()
+{
+  if(c == 0)
+     return;
+
+  c = c1;
+  c1 = c2;
+  c2 = *(in++);
+}
+
+int urldecode(char* ptr)
+{
+  int *out;
+  
+  in = (int *)ptr;
+  out = (int *)ptr;
+
+  c = *(in++);
+  c1 = 0;
+  c2 = 0;
+
+  if(c != 0) {
+    c1 = *(in++);
+    if(c1 != 0)
+      c2 = *(in++);
+  }
+
+  while( c != 0) {
+    if(c == '%' ) {
+      if( isxdigit(c1) && isxdigit(c2) ){
+	c1 = tolower(c1);
+	c2 = tolower(c2);
+
+	if( c1 <= '9' )
+	  c1 = c1 - '0';
+	else
+	  c1 = c1 - 'a' + 10;
+	if( c2 <= '9' )
+	  c2 = c2 - '0';
+	else
+	  c2 = c2 - 'a' + 10;
+
+	*(out++) = 16 * c1 + c2;
+
+	next();
+	next();
+	next();
+      } else {
+	*(out++) = '%';
+	next();
+      }
+    } else if( c == '+' ) {
+      *(out++) = ' ';
+      next();
+    } else {
+      *(out++) = c;
+      next();
+    }
+  }
+  *out = 0;
+  return 0;
+}
 
 int
 solometer_parse (char* ptr)
 {
   char *ptr1,*ptr2,c;
   
-  //base64_str_decode(ptr);
   ptr1 = strchr (ptr, ' ');
   if (ptr1 == NULL) {
     printf ("smt_parse: space after filename not found.\n");
@@ -57,6 +120,8 @@ solometer_parse (char* ptr)
   }
   *ptr1 = 0;
 
+  debug_printf("String to parse: --%s--\n",ptr);
+  urldecode(ptr);
   debug_printf("String to parse: --%s--\n",ptr);
   
   ptr1 = strstr(ptr,"ID=");
@@ -69,6 +134,8 @@ solometer_parse (char* ptr)
       ptr1 = strncpy(post_cookie,ptr1,10);
       *ptr2 = c;
       post_cookie[10] = 0;
+      eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);
+      eeprom_update_chksum();
     }
   }
 
@@ -84,6 +151,8 @@ solometer_parse (char* ptr)
       ptr1 = strncpy(post_hostname,ptr1,63);
       *ptr2 = c;
       post_hostname[63] = 0;
+      eeprom_save(solometer_host, post_hostname, strlen(post_hostname) + 1);
+      eeprom_update_chksum();
     }
   }
 
@@ -99,6 +168,8 @@ solometer_parse (char* ptr)
       ptr1 = strncpy(post_scriptname,ptr1,63);
       *ptr2 = c;
       post_scriptname[63] = 0;
+      eeprom_save(solometer_script, post_scriptname, strlen(post_scriptname) + 1);
+      eeprom_update_chksum();
     }
   }
 
@@ -116,7 +187,7 @@ httpd_handle_solometer (void)
     /* We've received new data (maybe even the first time).  We'll
       receive something like this:
       GET /solometer[?...]
-
+    */
     /* Make sure it's zero-terminated, so we can safely use strstr */
     char *ptr = (char *)uip_appdata;
     ptr[uip_len] = 0;
