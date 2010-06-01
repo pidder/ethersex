@@ -17,8 +17,6 @@ upload_data.php:
 - eigene sparsame Web-Konfiguration
 
 server/solometer.js:
+- Display am 1. Juni fixen
 - wbox besser positionieren
 - Tiptool DC-Spannung, DC-Strom der beiden Tracker
-
-Zu tun:
-Test am ES-5000
