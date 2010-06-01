@@ -17,10 +17,8 @@
  * For more information on the GPL, please go to:
  * http://www.gnu.org/copyleft/gpl.html
  */
-#include "config.h"
-#include "services/httpd/httpd.h"
-#include <ctype.h>
-#include "core/eeprom.h"
+
+#include "handle_solometer.h"
 
 char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
@@ -42,9 +40,8 @@ char PROGMEM httpd_header_500_smt[] =
 "HTTP/1.1 500 Server Error\n"
 "Connection: close\n";
 
-extern char post_hostname[], post_scriptname[], post_cookie[];
+// START Decode GET Method-sent Form data
 static int *in, c, c1, c2;
-
 void next()
 {
   if(c == 0)
@@ -107,6 +104,7 @@ int urldecode(char* ptr)
   *out = 0;
   return 0;
 }
+// END Decode GET Method-sent Form data
 
 int
 solometer_parse (char* ptr)

@@ -106,7 +106,7 @@ struct eeprom_config_t {
 
 #ifdef SOLOMETER_SUPPORT
 	char solometer_host[64];
-	char solometer_hostip[64];
+	char solometer_hostip[16];
 	char solometer_script[64];
 	char solometer_cookie[11];
 #endif
