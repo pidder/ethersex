@@ -25,6 +25,9 @@
 
 // Genereller Kram
 
+#define REBOOT_AFTER_DAYS 7
+#define REBOOT_HOUR_0-23 3
+
 // Messwert vom Wechselrichter
 typedef struct {
     uint32_t zeitstempel;

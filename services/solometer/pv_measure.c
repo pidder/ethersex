@@ -30,6 +30,7 @@ uint16_t mwindex = 0;
 uint8_t FILE_COMPLETE = 0; // muss auf 0 initialisiert werden
 uint8_t PV_MESSEN = 1;
 uint8_t PV_POSTEN = 1;
+extern uint32_t BOOT_TIME;
 
 void
 messen(uint32_t messwert)
@@ -68,6 +69,11 @@ messen(uint32_t messwert)
 #endif
 
 #ifndef PV_CALC_TINY
+  if(BOOT_TIME == 0) {
+    BOOT_TIME = messpuf[mwindex].zeitstempel;
+    debug_printf("Boot time set to %lx\n",BOOT_TIME);
+  }
+
   MESSWERT tmpwert;
   // Das ist der Messwert
   messpuf[mwindex].wert1 = messwert;
@@ -96,7 +102,16 @@ messen(uint32_t messwert)
     debug_printf("Messpuffer übergelaufen!\n");
     mwindex--;
   }
+
+    if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600) {
+      status.request_reset = 1;
+    }
 #else
+  if(BOOT_TIME == 0) {
+    BOOT_TIME = messpuf[0].zeitstempel;
+    debug_printf("Boot time set to %lx\n",BOOT_TIME);
+  }
+
   messpuf[0].wert1 = messpuf[0].wert1 + messwert;
   mwindex += 1;
   //debug_printf("Nach:Summe %lu Index %u.\n",messpuf[0].wert1,mwindex);
@@ -120,6 +135,10 @@ messen(uint32_t messwert)
     // Index setzen
     //mwindex = 1;
     zeit_vor = zeit;
+
+    if(messpuf[0].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600) {
+      status.request_reset = 1;
+    }
   }
 #endif //PV_CALC_TINY
 }

@@ -43,6 +43,7 @@ struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
 static int ip1,ip2,ip3,ip4;
+uint32_t BOOT_TIME;
 
 void
 pv_init()
@@ -51,6 +52,7 @@ pv_init()
 
   usart_init();
 
+  BOOT_TIME = 0;
 #ifdef PV_WEBHOST_NAME
   memset(post_hostname,0,64);
   eeprom_restore(solometer_host, post_hostname, 64);
