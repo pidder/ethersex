@@ -106,6 +106,10 @@ messen(uint32_t messwert)
     if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
       && zeit.hour == REBOOT_HOUR_0_23) {
       status.request_reset = 1;
+    } else {
+      debug_printf("%lu seconds until reboot", \
+      (REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[mwindex].zeitstempel - BOOT_TIME));
+      ;
     }
 #else
   if(BOOT_TIME == 0) {
@@ -140,6 +144,10 @@ messen(uint32_t messwert)
     if(messpuf[0].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
       && zeit.hour == REBOOT_HOUR_0_23) {
       status.request_reset = 1;
+    } else {
+      debug_printf("%lu seconds until reboot", \
+      (REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[0].zeitstempel - BOOT_TIME));
+      ;
     }
   }
 #endif //PV_CALC_TINY
