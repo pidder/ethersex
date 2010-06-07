@@ -26,7 +26,7 @@
 // Genereller Kram
 
 #define REBOOT_AFTER_DAYS 7
-#define REBOOT_HOUR_0-23 3
+#define REBOOT_HOUR_0_23 3
 
 // Messwert vom Wechselrichter
 typedef struct {

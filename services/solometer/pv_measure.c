@@ -103,7 +103,8 @@ messen(uint32_t messwert)
     mwindex--;
   }
 
-    if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600) {
+    if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
+      && zeit.hour == REBOOT_HOUR_0_23) {
       status.request_reset = 1;
     }
 #else
@@ -136,7 +137,8 @@ messen(uint32_t messwert)
     //mwindex = 1;
     zeit_vor = zeit;
 
-    if(messpuf[0].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600) {
+    if(messpuf[0].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
+      && zeit.hour == REBOOT_HOUR_0_23) {
       status.request_reset = 1;
     }
   }
