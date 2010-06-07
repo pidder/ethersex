@@ -29,7 +29,7 @@ struct param parameter[] = {
 { "Webhost IP:",	"IP",	"text",	post_hostip,	15,	solometer_hostip},
 { "Webhost script:",	"SCR",	"text",	post_scriptname,63,	solometer_script}
 };
-
+*/
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
 "Content-Length: 1000\n"
@@ -40,9 +40,8 @@ static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "</head>\n<body>\n"
 "<form action=\"http://";
 // My Ipaddr goes here
-static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">";
+static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
 // Inputs go here
-*/
 /*
 "  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>"
 "  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
@@ -52,7 +51,7 @@ static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\"
 "</form>"
 "</BODY>\n</HTML>\n";
 */
-
+/*
 char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
 "Content-Length: 1000\n"
@@ -62,11 +61,12 @@ char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
 "<title>SOLOMETER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
 "<form action=\"http://192.168.178.201/solometer\" method=\"get\" accept-charset=\"utf-8\">"
-"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>"
-"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-"  <input type=\"submit\" value=\" Absenden \">"
-"</form>"
+*/
+"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
+"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>\n"
+"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>\n"
+"  <input type=\"submit\" value=\" Absenden \">\n"
+"</form>\n"
 "</BODY>\n</HTML>\n";
 
 char PROGMEM httpd_header_500_smt[] =
@@ -278,7 +278,11 @@ httpd_handle_solometer (void)
 
     */
     
-    PASTE_P (page_header);
+    PASTE_P (p1);
+    uip_gethostaddr(&hostaddr);
+    uint8_t *ip = (uint8_t *) &hostaddr;
+    snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
+    PASTE_P (p2);
     PASTE_SEND ();
   }
 

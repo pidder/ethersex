@@ -58,6 +58,9 @@ messen(uint32_t messwert)
   if(zeit.year < 110) {
     debug_printf("Uhr nicht gestellt.\n");
 #ifndef SOLOMETER_WEB_DEBUG
+    //Reboot, if no NTP conn. after 10 mins
+    if(zeit.min > 10)
+      status.request_reset = 1;
     return;
 #endif
   }
@@ -103,14 +106,14 @@ messen(uint32_t messwert)
     mwindex--;
   }
 
-    if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
-      && zeit.hour == REBOOT_HOUR_0_23) {
-      status.request_reset = 1;
-    } else {
-      debug_printf("%lu seconds until reboot", \
-      (REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[mwindex].zeitstempel - BOOT_TIME));
-      ;
-    }
+  if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 24 * 3600 \
+    && zeit.hour == REBOOT_HOUR_0_23) {
+    status.request_reset = 1;
+  } else {
+    debug_printf("%lu seconds until reboot enable\n", \
+    ((uint32_t)REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[mwindex].zeitstempel - BOOT_TIME));
+    ;
+  }
 #else
   if(BOOT_TIME == 0) {
     BOOT_TIME = messpuf[0].zeitstempel;
@@ -140,15 +143,23 @@ messen(uint32_t messwert)
     // Index setzen
     //mwindex = 1;
     zeit_vor = zeit;
-
-    if(messpuf[0].zeitstempel - BOOT_TIME > REBOOT_AFTER_DAYS * 24 * 3600 \
-      && zeit.hour == REBOOT_HOUR_0_23) {
-      status.request_reset = 1;
-    } else {
-      debug_printf("%lu seconds until reboot", \
-      (REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[0].zeitstempel - BOOT_TIME));
-      ;
-    }
   }
+
+  if(zeit.hour == REBOOT_HOUR_0_23 && zeit.min == REBOOT_MIN_0_59) {
+    if(messpuf[0].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 3600 * 24)
+      status.request_reset = 1;
+    else
+      ntp_send_packet();
+  }
+/*    
+  if(messpuf[0].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 3600 * 24 \
+    && zeit.hour == REBOOT_HOUR_0_23) {
+    status.request_reset = 1;
+  } else {
+    debug_printf("%lu seconds until reboot enable\n", \
+    ((uint32_t)REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[0].zeitstempel - BOOT_TIME));
+    ;
+  }
+  */
 #endif //PV_CALC_TINY
 }

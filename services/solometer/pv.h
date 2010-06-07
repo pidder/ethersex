@@ -25,8 +25,9 @@
 
 // Genereller Kram
 
-#define REBOOT_AFTER_DAYS 7
-#define REBOOT_HOUR_0_23 3
+#define REBOOT_AFTER_DAYS 5
+#define REBOOT_HOUR_0_23 1
+#define REBOOT_MIN_0_59 37
 
 // Messwert vom Wechselrichter
 typedef struct {
@@ -40,7 +41,7 @@ typedef struct {
 #define MESSPUFSIZE 1
 #endif //PV_CALC_TINY
 
-#define POST_EVERY_MINS 2
+#define POST_EVERY_MINS 5
 
 // Function prototypes
 
