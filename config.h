@@ -140,7 +140,7 @@
 #if (defined(ECMD_PARSER_SUPPORT) && (!defined(TEENSY_SUPPORT)))  \
   || (defined(BOOTP_SUPPORT) && defined(BOOTP_TO_EEPROM_SUPPORT)) \
   || (defined(STELLA_SUPPORT) && !defined(TEENSY_SUPPORT)) \
-  || (defined(SOLOMETER_SUPPORT) && !defined(TEENSY_SUPPORT))
+  || (defined(SOLOMETER_SUPPORT))
 #  define EEPROM_SUPPORT 1
 #endif
 

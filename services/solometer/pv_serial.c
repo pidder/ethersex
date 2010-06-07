@@ -58,8 +58,10 @@ pv_init()
   debug_printf("Set webhost_name: --%s--\n",post_hostname);
 #endif //PV_WEBHOST_NAME
 #ifdef PV_WEBHOST_IP
-  debug_printf(PV_WEBHOST_IP "\n");
-  n = sscanf(PV_WEBHOST_IP,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
+  memset(post_hostip,0,16);
+  eeprom_restore(solometer_hostip, post_hostip, 16);
+  //debug_printf(PV_WEBHOST_IP "\n");
+  n = sscanf(post_hostip,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
   if(n == 4) {
     uip_ipaddr(&post_ipaddr,ip1,ip2,ip3,ip4);
     debug_printf("Set webhost_ip to %d.%d.%d.%d\n",ip1,ip2,ip3,ip4);
@@ -68,11 +70,15 @@ pv_init()
   }
 #endif //PV_WEBHOST_IP
 #ifdef PV_SOLOMETER_ID
-  n = snprintf(post_cookie,12,PV_SOLOMETER_ID);
+  memset(post_cookie,0,11);
+  eeprom_restore(solometer_cookie, post_cookie, 10);
+  //n = snprintf(post_cookie,12,PV_SOLOMETER_ID);
+  debug_printf("Set webhost_cookie --%s--\n",post_cookie);
 #endif
-  n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
+  memset(post_scriptname,0,64);
+  eeprom_restore(solometer_script, post_scriptname, 63);
+  //n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
   debug_printf("Set webhost_script --%s--\n",post_scriptname);
-
 }
 
 void

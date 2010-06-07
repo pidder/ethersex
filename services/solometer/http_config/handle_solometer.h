@@ -21,24 +21,13 @@
 #include "services/httpd/httpd.h"
 #include <ctype.h>
 #include "core/eeprom.h"
+#include "protocols/uip/uip.h"
+#include "protocols/uip/parse.h"
 
 extern char post_hostname[], post_hostip[], post_scriptname[], post_cookie[];
 extern char solometer_host[], solometer_cookie[], solometer_hostip[], solometer_script[];
-/*
-char PROGMEM page_header1[] = "HTTP/1.1 200 OK\n"
-"Host: solometer.local\n"
-"Content-Length: 1000\n"
-"Content-Type: text/html; charset=utf-8\n\n"
-"<html>\n<head>\n"
-"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
-"<title>SOLOMETER CONFIGURATION</title>\n"
-"</head>\n<body>\n";
 
-char PROGMEM page_footer1[] = "  <input type=\"submit\" value=\" Absenden \">"
-"</form>"
-"</BODY>\n</HTML>\n";
-
-typedef struct param {
+struct param {
   char *desc;
   char *name;
   char *typ;
@@ -46,12 +35,3 @@ typedef struct param {
   int maxlen;
   char *eepromname;
 };
-
-struct param parameter[] = {
-// Beschreibung 	Name 	Typ	RAM		maxlen	EEPROM
-{ "Sol-O-Meter ID:",	"ID",	"text",	post_cookie,	10,	solometer_cookie},
-{ "Webhost Name:",	"HST",	"text",	post_hostname,	63,	solometer_host},
-{ "Webhost IP:",	"IP",	"text",	post_hostip,	15,	solometer_hostip},
-{ "Webhost script:",	"SCR",	"text",	post_scriptname,63,	solometer_script}
-};
-*/

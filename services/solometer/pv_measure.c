@@ -113,7 +113,7 @@ messen(uint32_t messwert)
     // Alle Werte vor diesem Wert speichern 
     FILE_COMPLETE++;
     debug_printf("Sende Mittelwert %u.\n",messpuf[0].wert1);
-    status.request_reset = 1;
+    //status.request_reset = 1;
     post_file();
     // Diesen Wert an den Anfang kopieren
     messpuf[0].wert1 = messwert;

@@ -37,23 +37,24 @@ uint16_t spindex = 0;
 
 char post_hostname[64];
 uip_ipaddr_t post_ipaddr, *post_ipaddr_p;
+char post_hostip[16];
 char post_scriptname[64];
 char post_filename[16] = {'1','2','3','4','5','6','7','8','.','M','C','P',0};
 char post_cookie[16];
 
 static uip_conn_t *post_conn;
-static const char *ps1 = "POST ";
+static char PROGMEM ps1[] = "POST ";
 // post_scriptname goes here
-static const char *ps2 = " HTTP/1.0\r\nHost: ";
+static char PROGMEM ps2[] = " HTTP/1.0\r\nHost: ";
 // post_hostname goes here
-static const char *ps3 = "\r\nCookie: PVID=";
+static char PROGMEM ps3[] = "\r\nCookie: PVID=";
 // post_cookie goes here
-static const char *ps4 = "\r\nContent-Type: multipart/form-data; boundary=bOunDaRy"
+static char PROGMEM ps4[] = "\r\nContent-Type: multipart/form-data; boundary=bOunDaRy"
 	"\r\nContent-Length: 160000\r\n\r\n";
-static const char *poststr2 = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
+static char PROGMEM poststr2[] = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
 // post_filename goes here
-static const char *poststr3 = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-static const char *poststr4 = "\r\n--bOunDaRy\r\n"
+static char PROGMEM poststr3[] = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
+static char PROGMEM poststr4[] = "\r\n--bOunDaRy\r\n"
 	"Content-Disposition: form-data; name=\"submit\"\r\n\r\nSubmit\r\n--bOunDaRy--";
 
 void mcp_net_main()
@@ -85,10 +86,17 @@ void mcp_net_main()
     akt_std = tmpwert.zeitstempel;
     p = uip_sappdata;
     //p += sprintf(p,poststr1);
-    p += sprintf(p,"%s%s",ps1,post_scriptname);
-    p += sprintf(p,"%s%s",ps2,post_hostname);
-    p += sprintf(p,"%s%s",ps3,post_cookie);
-    p += sprintf(p,"%s",ps4);
+    p += strlcpy_P(p,ps1,strlen_P(ps1)+1);
+    p += strlcpy(p,post_scriptname,strlen(post_scriptname)+1);
+    //p += sprintf(p,"%s%s",ps1,post_scriptname);
+    p += strlcpy_P(p,ps2,strlen_P(ps2)+1);
+    p += strlcpy(p,post_hostname,strlen(post_hostname)+1);
+    //p += sprintf(p,"%s%s",ps2,post_hostname);
+    p += strlcpy_P(p,ps3,strlen_P(ps3)+1);
+    p += strlcpy(p,post_cookie,strlen(post_cookie)+1);
+    //p += sprintf(p,"%s%s",ps3,post_cookie);
+    p += strlcpy_P(p,ps4,strlen_P(ps4)+1);
+    //p += sprintf(p,"%s",ps4);
     post_data.length = p-(char *)uip_sappdata;
     uip_send(uip_sappdata,post_data.length);
     debug_printf("%s",uip_sappdata);
@@ -102,7 +110,10 @@ void mcp_net_main()
     post_data.stage = PV_DATA;
     debug_printf("PS2...\n");
     p = uip_sappdata;
-    p += sprintf(uip_sappdata,"%s%s%s",poststr2,post_filename,poststr3);
+    p += strlcpy_P(p,poststr2,strlen_P(poststr2)+1);
+    p += strlcpy(p,post_filename,strlen(post_filename)+1);
+    p += strlcpy_P(p,poststr3,strlen_P(poststr3)+1);
+    //p += sprintf(uip_sappdata,"%s%s%s",poststr2,post_filename,poststr3);
     post_data.length = p-(char *)uip_sappdata;
     uip_send(uip_sappdata,post_data.length);
     debug_printf("%s",uip_sappdata);
@@ -141,7 +152,8 @@ void mcp_net_main()
     post_data.stage = PV_PS3;
     debug_printf("PS3...\n");
     p = uip_sappdata;
-    p += sprintf(uip_sappdata,"%s",poststr4);
+    p += strlcpy_P(p,poststr4,strlen_P(poststr4)+1);
+    //p += sprintf(uip_sappdata,"%s",poststr4);
     post_data.length = p-(char *)uip_sappdata;
     uip_send(uip_sappdata,post_data.length);
     debug_printf("%s",uip_sappdata);
