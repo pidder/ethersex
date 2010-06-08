@@ -2,12 +2,26 @@ Diese Software dient dazu, den Wechselrichter einer Solaranlage auf
 kostengünstige Art und Weise mehrmals pro Minute auszulesen, die Daten auf
 einem Webserver zu speichern und sie in grafisch ansprechender Art im Internet
 verfügbar zu machen.
+Sie besteht aus drei Teilen:
+
+1. Der in C als Teil des Ethersex projekts geschriebene Firmware für ein Atmel
+Mikrocontroller-Board (befinden sich im Ordner ..ethersex/services/solometer)
+2. Der in PHP geschriebenen Software, die auf einem PHP-fähigen Webserver lebt und
+die von der Firmware gesendeten Daten in Empfang nimmt
+(../ethersex/services/solometer/server/upload_data.php) und
+3. Dem Viewer, der die auf dem Webserver abgelegten Daten grafisch aufbereitet und
+in einem Browser, der SVG unterstützt grafisch darstellt (Firefox, Opera, Safari)
+(in ../ethersex/services/solometer/server/solometer.svg und solometer.js).
+
 Durch die Verwendung von SVG für den Viewer sehen die Grafiken auch auf dem
 iPhone gut aus.
+Leider unterstützt der IE immer noch kein SVG. Es gibt von Adobe aber ein
+SVG-Viewer Plugin, das sogar kostenlos(!) heruntergeladen werden kann.
 
-Version 0.1 läuft bei mir auf der Etherrape-Hardware und auf einem Avr-Netio.
+Version 0.3 läuft bei mir auf der Etherrape-Hardware und auf einem Avr-Netio.
 Am seriellen Anschluss ist ein Effekta ES3300 Wechselrichter über ein
-Nullmodem-Kabel angeschlossen.
+Nullmodem-Kabel angeschlossen. Inzwischen wurde die Firmware auch an einem ES5000
+erfolgreich getestst.
 
 *** Zur Zeit kann nur ein Effekta-WR ausgelesen werden. ***
 *** Eine Version für SMA-Wechselrichter ist in Arbeit.  ***
@@ -20,12 +34,17 @@ schon fertig und werden Mitte Mai 2010 veröffentlicht) lesen und darstellen
 können.
 
 Zur Darstellung im Browser (Am besten Firefox ab Version 3.5 oder Opera 10) ruft
-man 'http://deine.webspace.adresse/solometer.svg' auf. Leider unterstützt der IE
-noch kein SVG. Es soll aber ein (kostenloses?) SVG Plugin von Adobe geben.
+man 'http://deine.webspace.adresse/solometer.svg' auf.
 
 Mein Dank geht an die Firma Effekta, die mich mit Dokumentation unterstützte,
 sowie an alle Mitarbeiter des Etherrape- und des Ethersex Projekts, von denen
 ich Teile des Codes übernommen habe.
+
+Version 0.3 Anmerkungen:
+- Die Netzwerkinformationen werden jetzt per BOOTP bzw. DHCP geholt.
+- Die Adresse des Webservers usw. können online eingestellt werden. Dazu ruft man
+  http://<IP des Sol-O-Meter>/solometer auf und füllt das Formular aus.
+- Diese daten werden im EEPROM gespeichert und gehen beim Reboot nicht verloren.
 
 Version 0.1 Anmerkungen:
 - Der Hostname des Webservers muss noch händisch in pv_inet eingetragen werden.

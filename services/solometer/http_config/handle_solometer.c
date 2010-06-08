@@ -36,36 +36,13 @@ static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Content-Type: text/html; charset=utf-8\n\n"
 "<html>\n<head>\n"
 "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
-"<title>SOLOMETER CONFIGURATION</title>\n"
+"<title>SOL-O-METER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
 "<form action=\"http://";
 // My Ipaddr goes here
-static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n";
 // Inputs go here
-/*
-"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>"
-"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-*/
-/*static char PROGMEM p3[] = "  <input type=\"submit\" value=\" Absenden \">"
-"</form>"
-"</BODY>\n</HTML>\n";
-*/
-/*
-char PROGMEM page_header[] = "HTTP/1.1 200 OK\n"
-"Host: solometer.local\n"
-"Content-Length: 1000\n"
-"Content-Type: text/html; charset=utf-8\n\n"
-"<html>\n<head>\n"
-"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
-"<title>SOLOMETER CONFIGURATION</title>\n"
-"</head>\n<body>\n"
-"<form action=\"http://192.168.178.201/solometer\" method=\"get\" accept-charset=\"utf-8\">"
-*/
-"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
-"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>\n"
-"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>\n"
-"  <input type=\"submit\" value=\" Absenden \">\n"
+static char PROGMEM p3[] = "  <input type=\"submit\" value=\" Absenden \">\n"
 "</form>\n"
 "</BODY>\n</HTML>\n";
 
@@ -213,7 +190,7 @@ httpd_handle_solometer (void)
 {
   int i = 0;
   uip_ipaddr_t hostaddr;
-  char *p;
+  //char *p;
   
   debug_printf("Handle_solometer called.\n");
   if (uip_newdata()) {
@@ -247,42 +224,20 @@ httpd_handle_solometer (void)
     PASTE_P (httpd_header_500_smt);
     PASTE_SEND ();
   } else {
-/*    p = uip_sappdata;
-    p += strlcpy_P(p,p1,strlen_P(p1)+1);
-
-    uip_gethostaddr(&hostaddr);
-    //p += print_ipaddr(&hostaddr,p,16);
-
-    uint8_t *ip = (uint8_t *) &hostaddr;
-    p += snprintf_P(p, 16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
-
-    p += strlcpy_P(p,p2,strlen_P(p2)+1);
-
-//"  <p>Solometer ID [h57smr74hf]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>"
-//"  <p>Webhost Name [www.schlossabi84.de]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-//"  <p>Webhost Script [/upload_data.php]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"32\"></p>"
-
-    for(i = 0; i < NUM_PAR ; i++) {
-      p += sprintf_P(p,PSTR("<P>"));
-      //p += sprintf(p,parameter[i].desc);
-
-      
-      p += sprintf_P(p,PSTR("</P>"));
-
-    }
-
-    p += strlcpy_P(p,p3,strlen_P(p3)+1);
-
-    //post_data.length = p-(char *)uip_sappdata;
-    uip_send(uip_sappdata,p-(char *)uip_sappdata);
-
-    */
     
     PASTE_P (p1);
     uip_gethostaddr(&hostaddr);
     uint8_t *ip = (uint8_t *) &hostaddr;
     snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
     PASTE_P (p2);
+    snprintf_P(uip_appdata + strlen(uip_appdata),120, \
+    PSTR("  <p>Solometer ID [%s]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"),post_cookie);
+    snprintf_P(uip_appdata + strlen(uip_appdata),160, \
+    PSTR("  <p>Webhost Name [%s]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"),post_hostname);
+    snprintf_P(uip_appdata + strlen(uip_appdata),160, \
+    PSTR("  <p>Webhost Script [%s]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"),post_scriptname);
+    PASTE_P (p3);
+    
     PASTE_SEND ();
   }
 
