@@ -42,14 +42,11 @@ extern char post_scriptname[];
 struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
-static int ip1,ip2,ip3,ip4;
 uint32_t BOOT_TIME;
 
 void
 pv_init()
 {
-  int n;
-
   usart_init();
 
   BOOT_TIME = 0;
@@ -63,6 +60,8 @@ pv_init()
   memset(post_hostip,0,16);
   eeprom_restore(solometer_hostip, post_hostip, 16);
   //debug_printf(PV_WEBHOST_IP "\n");
+  int n;
+  static int ip1,ip2,ip3,ip4;
   n = sscanf(post_hostip,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
   if(n == 4) {
     uip_ipaddr(&post_ipaddr,ip1,ip2,ip3,ip4);
@@ -87,7 +86,7 @@ void
 pv_periodic()
 {
   static uint16_t counter = 0;
-  static uint16_t messperiode = 25;
+  static uint16_t messperiode = 9;
   void *p;
 
   if(expected_bytes > 0 && pv_recv_buffer.len >= expected_bytes) {

@@ -32,11 +32,11 @@ struct param parameter[] = {
 */
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
-"Content-Length: 1000\n"
-"Content-Type: text/html; charset=utf-8\n\n"
+"Content-Length: 1000\n";
+static char PROGMEM p1a[] = "Content-Type: text/html; charset=utf-8\n\n"
 "<html>\n<head>\n"
-"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
-"<title>SOL-O-METER CONFIGURATION</title>\n"
+"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n";
+static char PROGMEM p1b[] = "<title>SOL-O-METER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
 "<form action=\"http://";
 // My Ipaddr goes here
@@ -123,16 +123,15 @@ solometer_parse (char* ptr)
   
   ptr1 = strchr (ptr, ' ');
   if (ptr1 == NULL) {
-    printf ("smt_parse: space after filename not found.\n");
+    debug_printf ("smt_parse: space after filename not found.\n");
     return -1;
   }
   *ptr1 = 0;
 
   debug_printf("String to parse: --%s--\n",ptr);
   urldecode(ptr);
-  debug_printf("String to parse: --%s--\n",ptr);
   
-  ptr1 = strstr(ptr,"ID=");
+  ptr1 = strstr_P(ptr,PSTR("ID="));
   if(ptr1 != NULL) {
     ptr1 += 3;
     ptr2 = strchrnul(ptr1,'&');
@@ -149,7 +148,7 @@ solometer_parse (char* ptr)
 
   debug_printf("Ausgewertet:PVID=--%s--\n",post_cookie);
   
-  ptr1 = strstr(ptr,"HST=");
+  ptr1 = strstr_P(ptr,PSTR("HST="));
   if(ptr1 != NULL) {
     ptr1 += 4;
     ptr2 = strchrnul(ptr1,'&');
@@ -166,7 +165,7 @@ solometer_parse (char* ptr)
 
   debug_printf("Ausgewertet:HST=--%s--\n",post_hostname);
   
-  ptr1 = strstr(ptr,"SCR=");
+  ptr1 = strstr_P(ptr,PSTR("SCR="));
   if(ptr1 != NULL) {
     ptr1 += 4;
     ptr2 = strchrnul(ptr1,'&');
@@ -188,10 +187,11 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  int i = 0;
+  static int all_sent;
+  int i = 0, mss;
   uip_ipaddr_t hostaddr;
   //char *p;
-  
+
   debug_printf("Handle_solometer called.\n");
   if (uip_newdata()) {
     /* We've received new data (maybe even the first time).  We'll
@@ -214,11 +214,13 @@ httpd_handle_solometer (void)
     }
   }
 
-  if (uip_acked ()) {
+  if (uip_acked () && all_sent) {
     uip_close ();
     return;
   }
 
+  all_sent = 0;
+  mss = uip_mss();
   PASTE_RESET ();
   if(i) {
     PASTE_P (httpd_header_500_smt);
@@ -226,19 +228,21 @@ httpd_handle_solometer (void)
   } else {
     
     PASTE_P (p1);
+    PASTE_P (p1a);
+    PASTE_P (p1b);
     uip_gethostaddr(&hostaddr);
     uint8_t *ip = (uint8_t *) &hostaddr;
     snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
     PASTE_P (p2);
-    snprintf_P(uip_appdata + strlen(uip_appdata),120, \
-    PSTR("  <p>Solometer ID [%s]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"),post_cookie);
-    snprintf_P(uip_appdata + strlen(uip_appdata),160, \
-    PSTR("  <p>Webhost Name [%s]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"),post_hostname);
-    snprintf_P(uip_appdata + strlen(uip_appdata),160, \
-    PSTR("  <p>Webhost Script [%s]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"),post_scriptname);
+    snprintf_P(uip_appdata + strlen(uip_appdata),40,PSTR("  <p>Solometer ID [%s"),post_cookie);
+    PASTE_P (PSTR("]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
+    snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Name [%s"),post_hostname);
+    PASTE_P(PSTR("]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
+    snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Script [%s"),post_scriptname);
+    PASTE_P(PSTR("]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
     PASTE_P (p3);
     
     PASTE_SEND ();
   }
-
+    all_sent = 1;
 }

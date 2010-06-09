@@ -124,7 +124,7 @@ void mcp_net_main()
     p = uip_sappdata;
     tmpwert = sendpuf[rbp];
     clock_localtime(&zeit,tmpwert.zeitstempel);
-    j = sprintf(puffer,"%u.%u.%u %u:%u:%u %lu\n",zeit.day,zeit.month,
+    j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
 	  zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.wert1);
     while((p-(char *)uip_sappdata + j < uip_mss()) && (post_data.stage == PV_DATA)) {
       //debug_printf("p:%u rbp:%u %u.%u.%u %u:%u:%u UTC\n",p-(char *)uip_sappdata,rbp,zeit.day,
@@ -139,7 +139,7 @@ void mcp_net_main()
       } else {
 	tmpwert = sendpuf[rbp];
 	clock_localtime(&zeit,tmpwert.zeitstempel);
-	j = sprintf(puffer,"%u.%u.%u %u:%u:%u %lu\n",zeit.day,zeit.month,
+	j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
 	    zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.wert1);
       }
     }
@@ -224,7 +224,7 @@ post_file()
   PV_MESSEN = 0;
   tmpwert = sendpuf[0];
   clock_localtime(&zeit,tmpwert.zeitstempel);
-  sprintf(post_filename,"%04x%04x.mcp",(uint16_t)(tmpwert.zeitstempel>>16),(uint16_t)tmpwert.zeitstempel);
+  sprintf_P(post_filename,PSTR("%04x%04x.mcp"),(uint16_t)(tmpwert.zeitstempel>>16),(uint16_t)tmpwert.zeitstempel);
   debug_printf("Timestamp in Buffer: %u.%u.%u %u:%u:%u UTC\n",zeit.year+1900,
       zeit.month,zeit.day,zeit.hour,zeit.min,zeit.sec);
 

@@ -31,6 +31,7 @@ uint8_t FILE_COMPLETE = 0; // muss auf 0 initialisiert werden
 uint8_t PV_MESSEN = 1;
 uint8_t PV_POSTEN = 1;
 extern uint32_t BOOT_TIME;
+extern void ntp_send_packet(void);
 
 void
 messen(uint32_t messwert)
