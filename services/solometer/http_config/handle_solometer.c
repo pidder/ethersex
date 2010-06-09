@@ -187,7 +187,7 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  static int all_sent;
+  static int cont_send;
   int i = 0, mss;
   uip_ipaddr_t hostaddr;
   //char *p;
@@ -212,13 +212,136 @@ httpd_handle_solometer (void)
 	debug_printf("This is a set operation. Parsing...\n");
 	i = solometer_parse(ptr);
     }
-  }
 
-  if (uip_acked () && all_sent) {
-    uip_close ();
+    mss = uip_mss();
+    PASTE_RESET ();
+    if(i || mss < 200) {
+      PASTE_P (httpd_header_500_smt);
+      cont_send = 0;
+    } else {
+      PASTE_P (p1);
+      cont_send = 1;
+    }
+    PASTE_SEND ();
     return;
   }
 
+  if(uip_acked()) {
+    PASTE_RESET();
+    switch(cont_send) {
+      case 0:
+	uip_close();
+	break;
+      case 1:
+	if(strlen(uip_appdata) + strlen_P(p1a) > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(p1a);
+	  cont_send++;
+	}
+      case 2:
+	if(strlen(uip_appdata) + strlen_P(p1b) > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(p1b);
+	  cont_send++;
+	}
+      case 3:
+	if(strlen(uip_appdata) + 16 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  uip_gethostaddr(&hostaddr);
+	  uint8_t *ip = (uint8_t *) &hostaddr;
+	  snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
+	  cont_send++;
+	}
+      case 4:
+	if(strlen(uip_appdata) + strlen_P(p2) > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(p2);
+	  cont_send++;
+	}
+      case 5:
+	if(strlen(uip_appdata) + 40 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  snprintf_P(uip_appdata + strlen(uip_appdata),40,PSTR("  <p>Solometer ID [%s"),post_cookie);
+	  cont_send++;
+	}
+      case 6:
+	if(strlen(uip_appdata) + 75 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P (PSTR("]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
+	  cont_send++;
+	}
+      case 7:
+	if(strlen(uip_appdata) + 90 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Name [%s"),post_hostname);
+	  cont_send++;
+	}
+      case 8:
+	if(strlen(uip_appdata) + 75 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(PSTR("]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
+	  cont_send++;
+	}
+      case 9:
+	if(strlen(uip_appdata) + 90 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Script [%s"),post_scriptname);
+	  cont_send++;
+	}
+      case 10:
+	if(strlen(uip_appdata) + 75 > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(PSTR("]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
+	  cont_send++;
+	}
+      case 11:
+	if(strlen(uip_appdata) + strlen_P(p3) > mss) {
+	  debug_printf("%d: %s\n",uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(p3);
+	  cont_send++;
+	}
+      default:
+	cont_send = 0;
+	debug_printf("%d: %s\n",uip_appdata);
+	PASTE_SEND();
+	break;
+    }
+    return;
+  }
+/*
   all_sent = 0;
   mss = uip_mss();
   PASTE_RESET ();
@@ -245,4 +368,5 @@ httpd_handle_solometer (void)
     PASTE_SEND ();
   }
     all_sent = 1;
+*/
 }
