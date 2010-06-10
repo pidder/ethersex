@@ -192,7 +192,9 @@ httpd_handle_solometer (void)
   uip_ipaddr_t hostaddr;
   //char *p;
 
-  debug_printf("Handle_solometer called.\n");
+  debug_printf("Handle_solometer TEST called.\n");
+  mss = uip_mss();
+
   if (uip_newdata()) {
     /* We've received new data (maybe even the first time).  We'll
       receive something like this:
@@ -202,28 +204,34 @@ httpd_handle_solometer (void)
     char *ptr = (char *)uip_appdata;
     ptr[uip_len] = 0;
 
-    debug_printf("Newdata: ---------\n%s\n-----------",ptr);
+    debug_printf("Newdata: ---------\n%s\n-----------\n",ptr);
 
-    ptr = strstr_P (ptr, PSTR("?")) + 1;
-    if(!ptr || *ptr == 0) {
-      debug_printf("This is a request only. Send page.\n");
-      i = 0;
-    } else {
+    if(strncasecmp_P (uip_appdata, PSTR ("GET /solometer"),14) == 0) {
+      debug_printf("This is the GET request header...\n");
+      ptr = strstr_P (uip_appdata, PSTR("?")) + 1;
+      if(!ptr || *ptr == 0) {
+	debug_printf("This is a request only. Send page.\n");
+	i = 0;
+      } else {
 	debug_printf("This is a set operation. Parsing...\n");
 	i = solometer_parse(ptr);
-    }
+      }
 
-    mss = uip_mss();
-    PASTE_RESET ();
-    if(i || mss < 200) {
-      PASTE_P (httpd_header_500_smt);
-      cont_send = 0;
+      PASTE_RESET ();
+      if(i || mss < 200) {
+	PASTE_P (httpd_header_500_smt);
+	cont_send = 0;
+      } else {
+	PASTE_P (p1);
+	cont_send = 1;
+      }
+      debug_printf("%d: %s\n",uip_appdata);
+      PASTE_SEND ();
+      return;
     } else {
-      PASTE_P (p1);
-      cont_send = 1;
+      debug_printf("Irrelevant data...ignoring.\n");
+      return;
     }
-    PASTE_SEND ();
-    return;
   }
 
   if(uip_acked()) {
