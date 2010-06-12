@@ -187,12 +187,12 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  static int cont_send;
+  static uint8_t cont_send;
   int i = 0, mss;
   uip_ipaddr_t hostaddr;
   //char *p;
 
-  debug_printf("Handle_solometer TEST called.\n");
+  debug_printf("Handle_solometer called.\n");
   mss = uip_mss();
 
   if (uip_newdata()) {
@@ -225,7 +225,7 @@ httpd_handle_solometer (void)
 	PASTE_P (p1);
 	cont_send = 1;
       }
-      debug_printf("%d: %s\n",uip_appdata);
+      debug_printf("%d: %s\n",cont_send,uip_appdata);
       PASTE_SEND ();
       return;
     } else {
@@ -242,7 +242,7 @@ httpd_handle_solometer (void)
 	break;
       case 1:
 	if(strlen(uip_appdata) + strlen_P(p1a) > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -251,7 +251,7 @@ httpd_handle_solometer (void)
 	}
       case 2:
 	if(strlen(uip_appdata) + strlen_P(p1b) > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -260,7 +260,7 @@ httpd_handle_solometer (void)
 	}
       case 3:
 	if(strlen(uip_appdata) + 16 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -271,7 +271,7 @@ httpd_handle_solometer (void)
 	}
       case 4:
 	if(strlen(uip_appdata) + strlen_P(p2) > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -280,7 +280,7 @@ httpd_handle_solometer (void)
 	}
       case 5:
 	if(strlen(uip_appdata) + 40 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -289,7 +289,7 @@ httpd_handle_solometer (void)
 	}
       case 6:
 	if(strlen(uip_appdata) + 75 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -298,7 +298,7 @@ httpd_handle_solometer (void)
 	}
       case 7:
 	if(strlen(uip_appdata) + 90 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -307,7 +307,7 @@ httpd_handle_solometer (void)
 	}
       case 8:
 	if(strlen(uip_appdata) + 75 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -316,7 +316,7 @@ httpd_handle_solometer (void)
 	}
       case 9:
 	if(strlen(uip_appdata) + 90 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -325,7 +325,7 @@ httpd_handle_solometer (void)
 	}
       case 10:
 	if(strlen(uip_appdata) + 75 > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -334,7 +334,7 @@ httpd_handle_solometer (void)
 	}
       case 11:
 	if(strlen(uip_appdata) + strlen_P(p3) > mss) {
-	  debug_printf("%d: %s\n",uip_appdata);
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
 	  break;
 	} else {
@@ -342,8 +342,8 @@ httpd_handle_solometer (void)
 	  cont_send++;
 	}
       default:
+	debug_printf("%d: %s\n",cont_send,uip_appdata);
 	cont_send = 0;
-	debug_printf("%d: %s\n",uip_appdata);
 	PASTE_SEND();
 	break;
     }
