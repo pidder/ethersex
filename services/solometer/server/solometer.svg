@@ -1,0 +1,40 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 
+* Copyright (c) 2010 by Peter Hartmann <solometerklammeraffehartmann-peter.de>
+* All right reserved.
+-->
+<svg
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg"
+  version="1.1">
+
+  <filter id = "Schatten" width = "150%" height = "150%">
+    <feOffset result = "offOut" in = "SourceGraphic" dx = "10" dy = "15"/>
+    <feGaussianBlur result = "blurOut" in = "offOut" stdDeviation = "5"/>
+    <feBlend in = "SourceGraphic" in2 = "blurOut" mode = "normal"/>
+  </filter>
+
+  <script type="text/ecmascript" xlink:href="solometer.js" />
+  <script type="text/ecmascript"> <![CDATA[
+    global_parameters();
+    create_graph(tagestitel,"Tag",minutennamen,minutenwerte,1.0);
+    create_graph(monatstitel,"Monat",tagesnamen,tageswerte,0.0);
+    create_graph(jahrestitel,"Jahr",monatsnamen,monatswerte,0.0);
+
+    //read_months_data();
+    //read_days_data();
+    read_mins_data();
+
+    z=0, k=1; groups = new Array();
+    groups[0] = document.getElementById("Tag");
+    groups[1] = document.getElementById("Monat");
+    groups[2] = document.getElementById("Jahr");
+    dieses = groups[0];
+    naechstes = groups[1];
+
+    setTimeout("animiere()", ANZEIGEDAUER*1000);
+  ]]></script>
+</svg>
