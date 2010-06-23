@@ -189,7 +189,7 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  static uint8_t cont_send;
+  static uint8_t cont_send, parsing = 0;
   int i = 0, mss;
   uip_ipaddr_t hostaddr;
   //char *p;
@@ -218,7 +218,18 @@ httpd_handle_solometer (void)
 	debug_printf("This is a set operation. Parsing...\n");
 	i = solometer_parse(ptr);
       }
+      parsing = 1;
+    }
 
+    if (parsing == 1) {
+      // Do not start answering until all packets have arrived
+      ptr = strstr_P (ptr, PSTR("\r\n\r\n"));
+      if (ptr) {
+	parsing = 2;
+      }
+    }
+
+    if (parsing == 2) {
       PASTE_RESET ();
       if(i || mss < 200) {
 	PASTE_P (httpd_header_500_smt);
@@ -229,9 +240,7 @@ httpd_handle_solometer (void)
       }
       debug_printf("%d: %s\n",cont_send,uip_appdata);
       PASTE_SEND ();
-      return;
-    } else {
-      debug_printf("Irrelevant data...ignoring.\n");
+      parsing = 0;
       return;
     }
   }
