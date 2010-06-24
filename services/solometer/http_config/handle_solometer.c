@@ -118,17 +118,27 @@ int urldecode(char* ptr)
 }
 // END Decode GET Method-sent Form data
 
-int
+int8_t
 solometer_parse (char* ptr)
 {
-  char *ptr1,*ptr2,c;
-  
+  char *str,*ptr1,*ptr2,c;
+
   ptr1 = strchr (ptr, ' ');
   if (ptr1 == NULL) {
     debug_printf ("smt_parse: space after filename not found.\n");
     return -1;
   }
+
+  /* Make a copy of the parameter string */
+  c = *ptr1;
   *ptr1 = 0;
+  if(!(str = malloc(strlen(ptr) + 1))) {
+    debug_printf("Not enough memory. Exiting.\n");
+    *ptr1 = c;
+    return -1;
+  }
+  ptr = strcpy(str,ptr);
+  *ptr1 = c;
 
   debug_printf("String to parse: --%s--\n",ptr);
   urldecode(ptr);
@@ -183,14 +193,16 @@ solometer_parse (char* ptr)
   }
 
   debug_printf("Ausgewertet:SCRPT=--%s--\n",post_scriptname);
+  free(ptr);
   return 0;
 }
 
 void
 httpd_handle_solometer (void)
 {
-  static uint8_t cont_send, parsing = 0;
-  int i = 0, mss;
+  static int8_t i = 0;
+  static uint8_t cont_send = 0, parsing = 0;
+  uint16_t mss;
   uip_ipaddr_t hostaddr;
   //char *p;
 
@@ -218,18 +230,24 @@ httpd_handle_solometer (void)
 	debug_printf("This is a set operation. Parsing...\n");
 	i = solometer_parse(ptr);
       }
+      debug_printf("Setze Parsing auf 1.\n");
       parsing = 1;
     }
-
+    
     if (parsing == 1) {
       // Do not start answering until all packets have arrived
-      ptr = strstr_P (ptr, PSTR("\r\n\r\n"));
+      debug_printf("Parsing = 1\n");
+      ptr = strstr_P (uip_appdata, PSTR("\r\n\r\n"));
       if (ptr) {
+	debug_printf("Setze Parsing auf 2.\n");
 	parsing = 2;
+      } else {
+	debug_printf("Double NL not found. Waiting...\n");
       }
     }
-
+    
     if (parsing == 2) {
+      debug_printf("Parsing = 2. Sende Antwort.\n");
       PASTE_RESET ();
       if(i || mss < 200) {
 	PASTE_P (httpd_header_500_smt);
@@ -360,32 +378,7 @@ httpd_handle_solometer (void)
     }
     return;
   }
-/*
-  all_sent = 0;
-  mss = uip_mss();
-  PASTE_RESET ();
-  if(i) {
-    PASTE_P (httpd_header_500_smt);
-    PASTE_SEND ();
-  } else {
-    
-    PASTE_P (p1);
-    PASTE_P (p1a);
-    PASTE_P (p1b);
-    uip_gethostaddr(&hostaddr);
-    uint8_t *ip = (uint8_t *) &hostaddr;
-    snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
-    PASTE_P (p2);
-    snprintf_P(uip_appdata + strlen(uip_appdata),40,PSTR("  <p>Solometer ID [%s"),post_cookie);
-    PASTE_P (PSTR("]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
-    snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Name [%s"),post_hostname);
-    PASTE_P(PSTR("]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
-    snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Script [%s"),post_scriptname);
-    PASTE_P(PSTR("]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
-    PASTE_P (p3);
-    
-    PASTE_SEND ();
-  }
-    all_sent = 1;
-*/
+
+  uip_close();
+  return;
 }
