@@ -243,6 +243,7 @@ httpd_handle_solometer (void)
 	parsing = 2;
       } else {
 	debug_printf("Double NL not found. Waiting...\n");
+	return;
       }
     }
     
@@ -379,6 +380,18 @@ httpd_handle_solometer (void)
     return;
   }
 
-  uip_close();
+  debug_printf("Unbekanntes Paket. Sende Antwort.\n");
+  PASTE_RESET ();
+  if(i || mss < 200) {
+    PASTE_P (httpd_header_500_smt);
+    cont_send = 0;
+  } else {
+    PASTE_P (p1);
+    cont_send = 1;
+  }
+  debug_printf("%d: %s\n",cont_send,uip_appdata);
+  PASTE_SEND ();
+  parsing = 0;
+  //uip_close();
   return;
 }
