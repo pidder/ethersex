@@ -30,6 +30,8 @@ extern struct pv_serial_buffer pv_recv_buffer;
 void
 wr_read()
 {
+
+  /* ToDo: Get the right codes for 40 byte return. This only reads 16 bytes */
   const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
   uint8_t ret;
   void *p;
@@ -37,7 +39,7 @@ wr_read()
   //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
   p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
   pv_recv_buffer.len = 0;
-  expected_bytes = (effekta_msg[4]*0x100+effekta_msg[5])*2;
+  expected_bytes = (effekta_msg[4]*0x100+effekta_msg[5])*2 + 3;
   debug_printf("%d bytes expected.\n",expected_bytes);
   ret = pv_rxstart(effekta_msg,8);
 }
@@ -45,9 +47,30 @@ wr_read()
 void
 wr_eval()
 {
-  uint32_t result;
+  MESSWERT result;
 
-  result = 10*(((uint32_t)pv_recv_buffer.data[3])*0x100 + (uint32_t)pv_recv_buffer.data[4]);
-  debug_printf("%lu power.\n",result);
+  // Byte 4=H,5=L Current Power output
+  // Byte 22=H,23=L Inverter int. temp
+  // Byte 24=H,25=L Inverter heatsink temp
+  // Byte 26=H,27=L DC1 input voltage
+  // Byte 28=H,29=L DC2 input voltage
+  // Byte 30=H,31=L DC1 input current
+  // Byte 32=H,33=L DC2 input current
+  // Byte 34=H,35=L Input power A
+  // Byte 36=H,37=L Input power B
+  // Byte 38=H,39=L Total output power HIGH word
+  // Byte 40=H,41=L Total output power LOW word
+
+  result.curpow = 10*((((uint32_t)pv_recv_buffer.data[3])<<8) + (uint32_t)pv_recv_buffer.data[4]);
+  result.invtemp = (((uint16_t)pv_recv_buffer.data[21])<<8) + (uint16_t)pv_recv_buffer.data[22];
+  result.hstemp = (((uint16_t)pv_recv_buffer.data[23])<<8) + (uint16_t)pv_recv_buffer.data[24];
+  result.dc1v = (((uint16_t)pv_recv_buffer.data[25])<<8) + (uint16_t)pv_recv_buffer.data[26];
+  result.dc2v = (((uint16_t)pv_recv_buffer.data[27])<<8) + (uint16_t)pv_recv_buffer.data[28];
+  result.dc1i = (((uint16_t)pv_recv_buffer.data[29])<<8) + (uint16_t)pv_recv_buffer.data[30];
+  result.dc2i = (((uint16_t)pv_recv_buffer.data[31])<<8) + (uint16_t)pv_recv_buffer.data[32];
+  result.totpow = (((uint32_t)pv_recv_buffer.data[37])<<24) + ((uint32_t)pv_recv_buffer.data[38]<<16);
+  result.totpow += ((((uint32_t)pv_recv_buffer.data[39])<<8) + (uint32_t)pv_recv_buffer.data[40]);
+
+  //debug_printf("curpow: %lu, totpow: %lu.\n",result.curpow, result.totpow);
   messen(result);
 }

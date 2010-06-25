@@ -125,7 +125,7 @@ void mcp_net_main()
     tmpwert = sendpuf[rbp];
     clock_localtime(&zeit,tmpwert.zeitstempel);
     j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
-	  zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.wert1);
+	  zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
     while((p-(char *)uip_sappdata + j < uip_mss()) && (post_data.stage == PV_DATA)) {
       //debug_printf("p:%u rbp:%u %u.%u.%u %u:%u:%u UTC\n",p-(char *)uip_sappdata,rbp,zeit.day,
 	//zeit.month,zeit.year+1900,zeit.hour,zeit.min,zeit.sec);
@@ -140,7 +140,7 @@ void mcp_net_main()
 	tmpwert = sendpuf[rbp];
 	clock_localtime(&zeit,tmpwert.zeitstempel);
 	j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
-	    zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.wert1);
+	    zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
       }
     }
     post_data.length = p-(char *)uip_sappdata;
@@ -212,14 +212,14 @@ post_file()
   MESSWERT tmpwert;
   struct clock_datetime_t zeit;
 
-#ifndef PV_CALC_TINY
+/*#ifndef PV_CALC_TINY
   for(spindex=0 ; spindex < mwindex ; spindex++) {
     sendpuf[spindex] = messpuf[spindex];
   }
-#else
+#else*/
   sendpuf[0] = messpuf[0];
   spindex = 1;
-#endif
+// #endif
 
   PV_MESSEN = 0;
   tmpwert = sendpuf[0];

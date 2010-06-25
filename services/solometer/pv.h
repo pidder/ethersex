@@ -32,14 +32,21 @@
 // Messwert vom Wechselrichter
 typedef struct {
     uint32_t zeitstempel;
-    uint32_t wert1;
+    uint32_t curpow;
+    uint16_t invtemp;
+    uint16_t hstemp;
+    uint16_t dc1v;
+    uint16_t dc2v;
+    uint16_t dc1i;
+    uint16_t dc2i;
+    uint32_t totpow;
 } MESSWERT;
 
-#ifndef PV_CALC_TINY
+/*#ifndef PV_CALC_TINY
 #define MESSPUFSIZE 256/sizeof(MESSWERT)
-#else
+#else*/
 #define MESSPUFSIZE 1
-#endif //PV_CALC_TINY
+// #endif //PV_CALC_TINY
 
 #define POST_EVERY_MINS 5
 
@@ -50,7 +57,7 @@ void wr_read(void);
 void wr_eval(void);
 
 // From pv_measure
-void messen(uint32_t);
+void messen(MESSWERT);
 
 // From pv_serial
 void pv_init(void);

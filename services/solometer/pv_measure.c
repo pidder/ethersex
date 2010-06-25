@@ -34,26 +34,25 @@ extern uint32_t BOOT_TIME;
 extern void ntp_send_packet(void);
 
 void
-messen(uint32_t messwert)
+messen(MESSWERT messwert)
 {
   struct clock_datetime_t zeit;
-  //MESSWERT tmpwert;
   static struct clock_datetime_t zeit_vor = {0,{{0,0,0,0,0}},0};
 
-  debug_printf("Messen aufgerufen %lu.\n",messwert);
+  debug_printf("Messen aufgerufen.\n");
   // Messung per Kommandozeile gestoppt
   if(PV_MESSEN == 0) {
     debug_printf("Messung gestoppt.\n");
     return;
   }
 
-#ifndef PV_CALC_TINY
+/*#ifndef PV_CALC_TINY
   messpuf[mwindex].zeitstempel = clock_get_time(); // UTC
   clock_localtime(&zeit, messpuf[mwindex].zeitstempel);
-#else
+#else*/
   messpuf[0].zeitstempel = clock_get_time(); // UTC
   clock_localtime(&zeit, messpuf[0].zeitstempel);
-#endif
+// #endif
 
   // Uhrzeit nicht aktuell (Läuft der NTP daemon nicht?)
   if(zeit.year < 110) {
@@ -72,7 +71,7 @@ messen(uint32_t messwert)
   }
 #endif
 
-#ifndef PV_CALC_TINY
+/*#ifndef PV_CALC_TINY
   if(BOOT_TIME == 0) {
     BOOT_TIME = messpuf[mwindex].zeitstempel;
     debug_printf("Boot time set to %lx\n",BOOT_TIME);
@@ -115,13 +114,20 @@ messen(uint32_t messwert)
     ((uint32_t)REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[mwindex].zeitstempel - BOOT_TIME));
     ;
   }
-#else
+#else*/
   if(BOOT_TIME == 0) {
     BOOT_TIME = messpuf[0].zeitstempel;
     debug_printf("Boot time set to %lx\n",BOOT_TIME);
   }
 
-  messpuf[0].wert1 = messpuf[0].wert1 + messwert;
+  messpuf[0].curpow += messwert.curpow;
+  messpuf[0].invtemp += messwert.invtemp;
+  messpuf[0].hstemp += messwert.hstemp;
+  messpuf[0].dc1v += messwert.dc1v;
+  messpuf[0].dc2v += messwert.dc2v;
+  messpuf[0].dc1i += messwert.dc1i;
+  messpuf[0].dc2i += messwert.dc2i;
+  messpuf[0].totpow = messwert.totpow;
   mwindex += 1;
   //debug_printf("Nach:Summe %lu Index %u.\n",messpuf[0].wert1,mwindex);
 
@@ -132,15 +138,26 @@ messen(uint32_t messwert)
     // Index eins zurück
     //mwindex--;
     //tmpwert = messpuf[mwindex];
-    messpuf[0].wert1 /= mwindex;
+    messpuf[0].curpow /= mwindex;
+    messpuf[0].invtemp /= mwindex;
+    messpuf[0].hstemp /= mwindex;
+    messpuf[0].dc1v /= mwindex;
+    messpuf[0].dc2v /= mwindex;
+    messpuf[0].dc1i /= mwindex;
+    messpuf[0].dc2i /= mwindex;
     mwindex = 1;
     // Alle Werte vor diesem Wert speichern 
     FILE_COMPLETE++;
-    debug_printf("Sende Mittelwert %u.\n",messpuf[0].wert1);
-    //status.request_reset = 1;
+    debug_printf("Sende Mittelwert %u.\n",messpuf[0].curpow);
     post_file();
-    // Diesen Wert an den Anfang kopieren
-    messpuf[0].wert1 = messwert;
+    // Neu initialisieren
+    messpuf[0].curpow = 0;
+    messpuf[0].invtemp = 0;
+    messpuf[0].hstemp = 0;
+    messpuf[0].dc1v = 0;
+    messpuf[0].dc2v = 0;
+    messpuf[0].dc1i = 0;
+    messpuf[0].dc2i = 0;
     // Index setzen
     //mwindex = 1;
     zeit_vor = zeit;
@@ -162,5 +179,5 @@ messen(uint32_t messwert)
     ;
   }
   */
-#endif //PV_CALC_TINY
+/*#endif //PV_CALC_TINY*/
 }
