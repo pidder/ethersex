@@ -27,19 +27,44 @@
 extern uint16_t expected_bytes;
 extern struct pv_serial_buffer pv_recv_buffer;
 
+uint16_t CALCUL_CRC(uint8_t *Msg, uint16_t lenght)
+{
+  uint16_t Crc;
+  int16_t i,n;
+  Crc = 0xFFFF;
+  for ( i = 0 ; i < lenght ; i++ ) {
+    Crc ^= Msg[i];
+    for ( n = 1 ; n <= 8 ; n++) {
+      /* if CRC is even */
+      if ((Crc % 2) == 0)
+	/* to right decrement */
+	Crc >>= 1;
+      else {
+	Crc >>= 1;
+	Crc ^= 0xA001;
+      }
+    }
+  }
+  return( Crc );
+}
+
 void
 wr_read()
 {
 
   /* ToDo: Get the right codes for 40 byte return. This only reads 16 bytes */
-  const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
+  //const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
+  uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x28, 0x00, 0x00 };
   uint8_t ret;
   void *p;
-
+  uint16_t CRCsum;
+  
   //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
   p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
   pv_recv_buffer.len = 0;
-  expected_bytes = (effekta_msg[4]*0x100+effekta_msg[5])*2 + 3;
+  effekta_msg[6] = (unsigned char)(CRCsum & 0xff);
+  effekta_msg[7] = (unsigned char)((CRCsum >> 8) & 0xff);
+  expected_bytes = (((uint16_t)effekta_msg[4]<<8) + effekta_msg[5]) * 2 + 3;
   debug_printf("%d bytes expected.\n",expected_bytes);
   ret = pv_rxstart(effekta_msg,8);
 }

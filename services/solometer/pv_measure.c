@@ -138,19 +138,22 @@ messen(MESSWERT messwert)
     // Index eins zurück
     //mwindex--;
     //tmpwert = messpuf[mwindex];
-    messpuf[0].curpow /= mwindex;
-    messpuf[0].invtemp /= mwindex;
-    messpuf[0].hstemp /= mwindex;
-    messpuf[0].dc1v /= mwindex;
-    messpuf[0].dc2v /= mwindex;
-    messpuf[0].dc1i /= mwindex;
-    messpuf[0].dc2i /= mwindex;
-    mwindex = 1;
+    if(mwindex != 0) {
+      messpuf[0].curpow /= mwindex;
+      messpuf[0].invtemp /= mwindex;
+      messpuf[0].hstemp /= mwindex;
+      messpuf[0].dc1v /= mwindex;
+      messpuf[0].dc2v /= mwindex;
+      messpuf[0].dc1i /= mwindex;
+      messpuf[0].dc2i /= mwindex;
+      messpuf[0].nummeas = mwindex;
+    }
     // Alle Werte vor diesem Wert speichern 
     FILE_COMPLETE++;
     debug_printf("Sende Mittelwert %u.\n",messpuf[0].curpow);
     post_file();
     // Neu initialisieren
+    mwindex = 0;
     messpuf[0].curpow = 0;
     messpuf[0].invtemp = 0;
     messpuf[0].hstemp = 0;
@@ -158,6 +161,7 @@ messen(MESSWERT messwert)
     messpuf[0].dc2v = 0;
     messpuf[0].dc1i = 0;
     messpuf[0].dc2i = 0;
+    messpuf[0].totpow = 0;
     // Index setzen
     //mwindex = 1;
     zeit_vor = zeit;

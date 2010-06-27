@@ -43,21 +43,23 @@ struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
 uint16_t expected_bytes;
 uint32_t BOOT_TIME;
+static uint16_t messperiode;
 
 void
 pv_init()
 {
   usart_init();
 
+  messperiode = 5 * MEAS_PERIOD_IN_SEC;
   BOOT_TIME = 0;
-#ifdef PV_WEBHOST_NAME
+//#ifdef PV_WEBHOST_NAME
   memset(post_hostname,0,64);
   eeprom_restore(solometer_host, post_hostname, 64);
   //n = snprintf(post_hostname,63,PV_WEBHOST_NAME);
   debug_printf("Set webhost_name: --%s--\n",post_hostname);
-#endif //PV_WEBHOST_NAME
-#ifdef PV_WEBHOST_IP
-  memset(post_hostip,0,16);
+//#endif //PV_WEBHOST_NAME
+//#ifdef PV_WEBHOST_IP
+/*  memset(post_hostip,0,16);
   eeprom_restore(solometer_hostip, post_hostip, 16);
   //debug_printf(PV_WEBHOST_IP "\n");
   int n;
@@ -68,14 +70,14 @@ pv_init()
     debug_printf("Set webhost_ip to %d.%d.%d.%d\n",ip1,ip2,ip3,ip4);
   } else {
     debug_printf("Webhost IP scan failed: n=%d %d %d %d %d\n",n,ip1,ip2,ip3,ip4);
-  }
-#endif //PV_WEBHOST_IP
-#ifdef PV_SOLOMETER_ID
+  }*/
+//#endif //PV_WEBHOST_IP
+//#ifdef PV_SOLOMETER_ID
   memset(post_cookie,0,11);
   eeprom_restore(solometer_cookie, post_cookie, 10);
   //n = snprintf(post_cookie,12,PV_SOLOMETER_ID);
   debug_printf("Set webhost_cookie --%s--\n",post_cookie);
-#endif
+//#endif
   memset(post_scriptname,0,64);
   eeprom_restore(solometer_script, post_scriptname, 63);
   //n = snprintf(post_scriptname,63,PV_WEBHOST_SCRIPT);
@@ -86,7 +88,6 @@ void
 pv_periodic()
 {
   static uint16_t counter = 0;
-  static uint16_t messperiode = 9;
   void *p;
 
   if(expected_bytes > 0 && pv_recv_buffer.len >= expected_bytes) {

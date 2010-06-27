@@ -29,6 +29,10 @@
 #define REBOOT_HOUR_0_23 1
 #define REBOOT_MIN_0_59 37
 
+// Do not set to zero!
+#define MEAS_PERIOD_IN_SEC 2
+#define POST_EVERY_MINS 5
+
 // Messwert vom Wechselrichter
 typedef struct {
     uint32_t zeitstempel;
@@ -40,6 +44,7 @@ typedef struct {
     uint16_t dc1i;
     uint16_t dc2i;
     uint32_t totpow;
+    uint16_t nummeas;
 } MESSWERT;
 
 /*#ifndef PV_CALC_TINY
@@ -47,8 +52,6 @@ typedef struct {
 #else*/
 #define MESSPUFSIZE 1
 // #endif //PV_CALC_TINY
-
-#define POST_EVERY_MINS 5
 
 // Function prototypes
 
@@ -64,10 +67,10 @@ void pv_init(void);
 void pv_periodic(void);
 uint8_t pv_rxstart(uint8_t*, uint8_t);
 
+#define PV_SERIAL_BUFFER_LEN 48
+
 // From pv_inet
 void post_file(void);
-
-#define PV_SERIAL_BUFFER_LEN 48
 
 struct pv_serial_buffer {
   uint8_t len;

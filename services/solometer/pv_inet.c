@@ -60,13 +60,19 @@ static char PROGMEM poststr4[] = "\r\n--bOunDaRy\r\n"
 void mcp_net_main()
 {
   char *p;
-  static char puffer[32];
+  //static char puffer[80];
+  char *puffer;
   static uint16_t rbp = 0,j;
   static uint32_t akt_std;
   MESSWERT tmpwert;
   struct clock_datetime_t zeit;
 
-  //debug_printf("mcp net main()\n");
+  puffer = (char *)malloc(90);
+  if(!puffer) {
+    debug_printf("mcp_net_main: not enough memory!\n");
+    return;
+  }
+
   if (uip_aborted() || uip_timedout()) {
     debug_printf("Connection aborted.\n");
     post_data.stage = PV_NOTCONN;
@@ -124,8 +130,10 @@ void mcp_net_main()
     p = uip_sappdata;
     tmpwert = sendpuf[rbp];
     clock_localtime(&zeit,tmpwert.zeitstempel);
-    j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
+    j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu "),zeit.day,zeit.month,
 	  zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
+    j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
+	  tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.totpow,tmpwert.nummeas);
     while((p-(char *)uip_sappdata + j < uip_mss()) && (post_data.stage == PV_DATA)) {
       //debug_printf("p:%u rbp:%u %u.%u.%u %u:%u:%u UTC\n",p-(char *)uip_sappdata,rbp,zeit.day,
 	//zeit.month,zeit.year+1900,zeit.hour,zeit.min,zeit.sec);
@@ -139,8 +147,10 @@ void mcp_net_main()
       } else {
 	tmpwert = sendpuf[rbp];
 	clock_localtime(&zeit,tmpwert.zeitstempel);
-	j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu\n"),zeit.day,zeit.month,
+	j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu "),zeit.day,zeit.month,
 	    zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
+	j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
+	    tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.totpow,tmpwert.nummeas);
       }
     }
     post_data.length = p-(char *)uip_sappdata;
@@ -168,6 +178,8 @@ void mcp_net_main()
   if(uip_newdata() && uip_len && post_data.stage == PV_IDLE) {
     debug_printf("NEWDATA...\n%s",uip_appdata);
   }
+
+  free(puffer);
   return;
 }
 
