@@ -13,7 +13,6 @@ serversoft:
 	sed s/MeinKeks/$(PV_SOLOMETER_ID)/ services/solometer/server/upload_template.php | \
 	  sed s/RawFilesKept/$(PV_KEEP_RAW)/ \
 	  >services/solometer/server/upload_data.php
-	cat services/solometer/soap/m4header services/solometer/soap/pvs.ht >embed/pvs.ht.m4
 
 #embed/pvs.ht.m4	:	services/solometer/soap/m4header services/solometer/soap/pvs.ht
 #	cat services/solometer/soap/m4header services/solometer/soap/pvs.ht >embed/pvs.ht.m4

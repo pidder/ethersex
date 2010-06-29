@@ -22,6 +22,7 @@
 
 $uploadpath = "upload/";
 $out_datei = "day.dat";
+$meas_datei = "meas.dat";
 $hist_datei = "days_hist.dat";
 $month_datei = "months.dat";
 
@@ -75,7 +76,7 @@ if($k === FALSE) {
 }
 
 // File upload
-if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"]["size"] < 20000)) {
+if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"]["size"] < 2000)) {
 
   if ($_FILES["file"]["error"] > 0) {
     $pstr .= "Error: " . $_FILES["file"]["error"] . "<br />";
@@ -87,7 +88,7 @@ if (($_FILES["file"]["type"] == "application/octet-stream") && ($_FILES["file"][
   $pstr .= "Error: Invalid file";
 }
 
-// Letzte nicht leere Zeile des Tagesfiles einlesen um alte Werte zu ermitteln
+// Erste Zeile des Tagesfiles einlesen um alte Werte zu ermitteln
 if (file_exists($out_datei)) {
   $min_day = fopen ($out_datei, "r");
   $md_zeile = fgets ($min_day, 1024);
@@ -107,12 +108,19 @@ if (file_exists($out_datei)) {
   $pstr .= "<br/>Altes File nicht zu oeffnen."; 
   $md[0] = 0;$md[1] = 0;$md[2] = 0;$md[3] = 0;
 }
-$pstr .= "<br/>Tag:".$md[0]." Monat:".$md[1]." Jahr:".$md[2]." Summe:".$md[3]; 
+$pstr .= "<br/> Bisher Tag:".$md[0]." Monat:".$md[1]." Jahr:".$md[2]." Summe:".$md[3]; 
 
 // Über Daten aus eben hochgeladener Datei mitteln
 $summe = 0;
 $num = 0;
 $datum = "";
+$invtemp = 0;
+$hstemp = 0;
+$dc1v = 0;
+$dc2v = 0;
+$dc1i = 0;
+$dc2i = 0;
+$total = 0;
 //$in_datei = $_FILES["file"]["name"];
 $in_datei = $uploadpath.$_FILES["file"]["name"];
 if ($datei = fopen ( $in_datei, "r")) {
@@ -122,16 +130,22 @@ if ($datei = fopen ( $in_datei, "r")) {
     // Numerische Daten per regexp in Array einlesen (Mind. 7: Tag, Monat, Jahr, Stunde, Minute, Sekunde, Messwert(e))
     if(($el_found = preg_match_all("/[0-9]+/",$zeile,&$a,PREG_PATTERN_ORDER)) > 6) {
       // Falls dies der erste Schleifenaufruf ist, ist $datum == ""
-      if(strlen($datum) < 1) {
+      if(strlen($datum) < 1) { // Erster Schleifendurchlauf
 	$pstr .= "<br/>Erster Schleifendurchlauf";
 	// Falls Tagesfile existiert und Tag des geposteten Files != Tag des Datenfiles
 	$pstr .= sprintf("<br/>Tag ex. File:%d, Tag neue daten: %d <br>",$md[0],$a[0][0]);
-	if(($md[0] != 0) && ($a[0][0] != $md[0])) {
+	if(($md[0] != 0) && ($a[0][0] != $md[0])) { // Neuer Tag
 	  if(file_exists($out_datei)) {
 	    $log_datei = "upload_log_newday.html";
 	    // Tagesdatei unter neuem Namen abspeichern
 	    $newname = sprintf("day%02d%02d%02d.dat",$md[2],$md[1],$md[0]);
 	    rename($out_datei,$newname);
+	    // Neue out_datei wird später angelegt.
+	  }
+	  if(file_exists($meas_datei)) {
+	    $newname = sprintf("meas%02d%02d%02d.dat",$md[2],$md[1],$md[0]);
+	    rename($meas_datei,$newname);
+	    // Neue meas_datei wird später angelegt.
 	  }
 
 	  // Akkumulierte Energie des bisherigen Tagesfiles abspeichern
@@ -161,7 +175,7 @@ if ($datei = fopen ( $in_datei, "r")) {
 	    $mon = explode( "\n", $str);
 	    $pstr .= sprintf("<br/>Mon[0] = %s",$mon[0]);
 	    $pstr .= sprintf("<br/>Mon[1] = %s",$mon[1]);
-	    // Falls die erste Zeile einen vern. Wert enthält
+	    // Falls die erste Zeile einen vernünftigen Wert enthält
 	    if(($el_found1 = preg_match_all("/[0-9]+/",$mon[0],&$b,PREG_PATTERN_ORDER)) > 4) {
 	      $pstr .= sprintf("<br/>el_found1 = %d",$el_found1);
 	      // Falls gleicher Monat
@@ -171,7 +185,7 @@ if ($datei = fopen ( $in_datei, "r")) {
 		$res = $b[0][3] + $md[3];
 		// Ersetze erste Zeile
 		$beginn = 1;
-	      } else {
+	      } else { // Falls neuer Monat
 		$log_datei = "upload_log_newmonth.html";
 		$pstr .= sprintf("<br/>Neuer Monat. Schreibe Wert %d.",$md[3]);
 		// Starte neuen Monat und
@@ -192,7 +206,7 @@ if ($datei = fopen ( $in_datei, "r")) {
 	      }
 	    }
 	    fclose($datei1);
-	  } else {
+	  } else { // Erzeuge neue Monatsdatei
 	    $pstr .= "<br/>Erzeuge neue Datei.";
 	    $datei1 = fopen ( $month_datei, "w+");
 	    $pstr .= sprintf("<br/>Schreibe: %02d.%02d.%02d|%d|0|0|0|0",$md[0],$md[1],$md[2],$md[3]);
@@ -206,15 +220,24 @@ if ($datei = fopen ( $in_datei, "r")) {
 	  }
 	  // Setze neuen Tag und setze Tagesleistung = 0
 	  $md[0] = $a[0][0];$md[3] = 0;
-	}
+	} // Ende Falls neuer Tag
 	// Erzeuge einen neuen Datumsstring
 	$datum = sprintf("%02d.%02d.%02d %02d:%02d:%02d",$a[0][0],$a[0][1],$a[0][2],$a[0][3],$a[0][4],$a[0][5]);
-      }
+      } // Ende erster Schleifendurchlauf
       // Summiere Messwert
       $num += 1;
       $summe += $a[0][6];
-    }
-  }
+      if($el_found > 14) {
+	$invtemp += $a[0][7]; // Inverter temp
+	$hstemp += $a[0][8]; // Heatsink temp
+	$dc1v += $a[0][9];
+	$dc2v += $a[0][10];
+	$dc1i += $a[0][11];
+	$dc2i += $a[0][12];
+	$total = $a[0][13]; // Gesamtenergie vom Wechselrichter
+      }
+    } // Ende mindestens sieben Werte gefunden
+  } // Ende Fileende erreicht
   fclose($datei);
 }
 
@@ -223,14 +246,31 @@ if((file_exists($out_datei)) && (($fs = filesize($out_datei)) > 0)) {
   $datei = fopen ($out_datei, "r+");
   $str = fread ($datei, $fs);
   rewind($datei);
-  fputs($datei,$datum."|".intval($summe/$num).";0;".intval($md[3]+$summe/(12*$num)).";0");
+  fputs($datei,$datum."|".intval($summe/$num).";".intval($total).";".intval($md[3]+$summe/(12*$num)).";0");
   fputs($datei,"|0;0;0;0|0;0;0;0|0;0;0;0|0;0;0;0\n");
   fwrite($datei,$str);
   fclose($datei);
-} else {
+} else { // Falls Datei nicht existiert, neu erzeugen
   $datei = fopen ($out_datei, "a+");
-  fputs($datei,$datum."|".intval($summe/$num).";0;".intval($md[3]+$summe/(12*$num)).";0");
+  fputs($datei,$datum."|".intval($summe/$num).";".intval($total).";".intval($md[3]+$summe/(12*$num)).";0");
   fputs($datei,"|0;0;0;0|0;0;0;0|0;0;0;0|0;0;0;0\n");
+  //fputs($datei,$datum." ".$summe/$num."\n");
+  fclose($datei);
+}
+
+// Öffne Messungs-datei und füge gemittelten Wert am Anfang ein
+if((file_exists($meas_datei)) && (($fs = filesize($meas_datei)) > 0)) {
+  $datei = fopen ($meas_datei, "r+");
+  $str = fread ($datei, $fs);
+  rewind($datei);
+  fputs($datei,$datum."|".intval($invtemp/$num).";".intval($hstemp/$num).";".intval($dc1v/$num).";");
+  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num)."\n");
+  fwrite($datei,$str);
+  fclose($datei);
+} else { // Falls Datei nicht existiert, neu erzeugen
+  $datei = fopen ($meas_datei, "a+");
+  fputs($datei,$datum."|".intval($invtemp/$num).";".intval($hstemp/$num).";".intval($dc1v/$num).";");
+  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num)."\n");
   //fputs($datei,$datum." ".$summe/$num."\n");
   fclose($datei);
 }
