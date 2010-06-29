@@ -40,81 +40,33 @@ messen(MESSWERT messwert)
   static struct clock_datetime_t zeit_vor = {0,{{0,0,0,0,0}},0};
 
   debug_printf("Messen aufgerufen.\n");
+
   // Messung per Kommandozeile gestoppt
   if(PV_MESSEN == 0) {
     debug_printf("Messung gestoppt.\n");
     return;
   }
 
-/*#ifndef PV_CALC_TINY
-  messpuf[mwindex].zeitstempel = clock_get_time(); // UTC
-  clock_localtime(&zeit, messpuf[mwindex].zeitstempel);
-#else*/
   messpuf[0].zeitstempel = clock_get_time(); // UTC
   clock_localtime(&zeit, messpuf[0].zeitstempel);
-// #endif
 
   // Uhrzeit nicht aktuell (Läuft der NTP daemon nicht?)
   if(zeit.year < 110) {
     debug_printf("Uhr nicht gestellt.\n");
-#ifndef SOLOMETER_WEB_DEBUG
+#   ifndef SOLOMETER_WEB_DEBUG
     //Reboot, if no NTP conn. after 10 mins
     if(zeit.min > 10)
       status.request_reset = 1;
     return;
-#endif
+#   endif
   }
-#ifndef SOLOMETER_WEB_DEBUG
+# ifndef SOLOMETER_WEB_DEBUG
   // Erster Durchlauf: Zeit_vor initialisieren.
   if(zeit_vor.year < 110) {
     zeit_vor = zeit;
   }
-#endif
+# endif
 
-/*#ifndef PV_CALC_TINY
-  if(BOOT_TIME == 0) {
-    BOOT_TIME = messpuf[mwindex].zeitstempel;
-    debug_printf("Boot time set to %lx\n",BOOT_TIME);
-  }
-
-  MESSWERT tmpwert;
-  // Das ist der Messwert
-  messpuf[mwindex].wert1 = messwert;
-  // Pufferzähler eins hoch
-  mwindex++;
-
-  // Am Ende der Messperiode Werte abspeichern
-  debug_printf("Zeit.min: %d, Zeit_vor.min: %d\n",zeit.min,zeit_vor.min);
-  if(!(zeit.min % POST_EVERY_MINS) && zeit.min != zeit_vor.min) {
-    debug_printf("\nMessperiode beendet.\n");
-    // Index eins zurück
-    mwindex--;
-    tmpwert = messpuf[mwindex];
-    // Alle Werte vor diesem Wert speichern 
-    FILE_COMPLETE++;
-    post_file();
-    // Diesen Wert an den Anfang kopieren
-    messpuf[0] = tmpwert;
-    // Index setzen
-    mwindex = 1;
-    zeit_vor = zeit;
-  }
-
-  // Falls der Rampuffer voll ist, letzten Wert überschreiben
-  if((mwindex > MESSPUFSIZE-1)) {
-    debug_printf("Messpuffer übergelaufen!\n");
-    mwindex--;
-  }
-
-  if(messpuf[mwindex-1].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 24 * 3600 \
-    && zeit.hour == REBOOT_HOUR_0_23) {
-    status.request_reset = 1;
-  } else {
-    debug_printf("%lu seconds until reboot enable\n", \
-    ((uint32_t)REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[mwindex].zeitstempel - BOOT_TIME));
-    ;
-  }
-#else*/
   if(BOOT_TIME == 0) {
     BOOT_TIME = messpuf[0].zeitstempel;
     debug_printf("Boot time set to %lx\n",BOOT_TIME);
@@ -129,15 +81,12 @@ messen(MESSWERT messwert)
   messpuf[0].dc2i += messwert.dc2i;
   messpuf[0].totpow = messwert.totpow;
   mwindex += 1;
-  //debug_printf("Nach:Summe %lu Index %u.\n",messpuf[0].wert1,mwindex);
 
   // Am Ende der Messperiode Werte abspeichern
   debug_printf("Zeit.min: %d, Zeit_vor.min: %d\n",zeit.min,zeit_vor.min);
   if(!(zeit.min % POST_EVERY_MINS) && zeit.min != zeit_vor.min) {
     debug_printf("\nMessperiode beendet.\n");
-    // Index eins zurück
-    //mwindex--;
-    //tmpwert = messpuf[mwindex];
+    // Mittelwerte berechnen
     if(mwindex != 0) {
       messpuf[0].curpow /= mwindex;
       messpuf[0].invtemp /= mwindex;
@@ -162,26 +111,14 @@ messen(MESSWERT messwert)
     messpuf[0].dc1i = 0;
     messpuf[0].dc2i = 0;
     messpuf[0].totpow = 0;
-    // Index setzen
-    //mwindex = 1;
     zeit_vor = zeit;
   }
 
+  // Reboot or resync local clock
   if(zeit.hour == REBOOT_HOUR_0_23 && zeit.min == REBOOT_MIN_0_59) {
     if(messpuf[0].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 3600 * 24)
       status.request_reset = 1;
     else
       ntp_send_packet();
   }
-/*    
-  if(messpuf[0].zeitstempel - BOOT_TIME > (uint32_t)REBOOT_AFTER_DAYS * 3600 * 24 \
-    && zeit.hour == REBOOT_HOUR_0_23) {
-    status.request_reset = 1;
-  } else {
-    debug_printf("%lu seconds until reboot enable\n", \
-    ((uint32_t)REBOOT_AFTER_DAYS * 24 * 3600)-(messpuf[0].zeitstempel - BOOT_TIME));
-    ;
-  }
-  */
-/*#endif //PV_CALC_TINY*/
 }

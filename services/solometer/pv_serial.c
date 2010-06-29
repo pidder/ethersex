@@ -92,6 +92,7 @@ pv_periodic()
 
   if(expected_bytes > 0 && pv_recv_buffer.len >= expected_bytes) {
     // Daten sind vollständig. Abspeichern.
+    debug_printf("%u bytes received.\n",pv_recv_buffer.len);
     wr_eval();
     p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
     //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
@@ -102,7 +103,7 @@ pv_periodic()
   if(counter++ > messperiode) {
     if(expected_bytes > 0 && pv_recv_buffer.len < expected_bytes) {
       //Timeout. Buffer löschen. len auf Null.
-      debug_printf("Timeout\n");
+      debug_printf("%u bytes received. --Timeout--.\n",pv_recv_buffer.len);
       p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
       //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
       pv_recv_buffer.len = 0;
