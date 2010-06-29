@@ -28,7 +28,6 @@ $month_datei = "months.dat";
 $log_datei = "upload_log.html";
 $write_logdatei = 1;
 $KEEP_RAW_FILES = RawFilesKept;
-//$ACCEPTED_COOKIE = "MeinKeks";
 $ACCEPTED_COOKIES = array(
   // "nutg76f8lo" => "SMA Sunny Boy2100TL",
   "MeinKeks" => "Effekta ES3300"
@@ -52,7 +51,7 @@ function cleanup($dirname,$keep_secs)
   return $pstr;
 }
 
-// Header and Footer of return page
+// Header and Footer of logfile
 $HEAD="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"  \"http://www.w3.org/TR/html4/strict.dtd\">\n<html>\n<head><title>Upload</title></head>\n<body>";
 $FOOT="</body></html>";
 // Return string
