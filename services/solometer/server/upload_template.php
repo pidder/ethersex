@@ -135,13 +135,14 @@ if ($datei = fopen ( $in_datei, "r")) {
 	// Falls Tagesfile existiert und Tag des geposteten Files != Tag des Datenfiles
 	$pstr .= sprintf("<br/>Tag ex. File:%d, Tag neue daten: %d <br>",$md[0],$a[0][0]);
 	if(($md[0] != 0) && ($a[0][0] != $md[0])) { // Neuer Tag
+	  // Tagesdatei unter neuem Namen abspeichern
 	  if(file_exists($out_datei)) {
 	    $log_datei = "upload_log_newday.html";
-	    // Tagesdatei unter neuem Namen abspeichern
 	    $newname = sprintf("day%02d%02d%02d.dat",$md[2],$md[1],$md[0]);
 	    rename($out_datei,$newname);
 	    // Neue out_datei wird später angelegt.
 	  }
+	  // Messdatei unter neuem Namen abspeichern
 	  if(file_exists($meas_datei)) {
 	    $newname = sprintf("meas%02d%02d%02d.dat",$md[2],$md[1],$md[0]);
 	    rename($meas_datei,$newname);

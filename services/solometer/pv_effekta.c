@@ -62,6 +62,7 @@ wr_read()
   //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
   p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
   pv_recv_buffer.len = 0;
+  CRCsum = CALCUL_CRC(effekta_msg,6);
   effekta_msg[6] = (unsigned char)(CRCsum & 0xff);
   effekta_msg[7] = (unsigned char)((CRCsum >> 8) & 0xff);
   expected_bytes = (((uint16_t)effekta_msg[4]<<8) + effekta_msg[5]) * 2 + 3;
