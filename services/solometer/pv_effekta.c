@@ -54,7 +54,7 @@ wr_read()
 
   /* ToDo: Get the right codes for 40 byte return. This only reads 16 bytes */
   //const uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x10, 0x79, 0xCC };
-  uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x28, 0x00, 0x00 };
+  uint8_t effekta_msg[] = { 0x01, 0x03, 0xC0, 0x20, 0x00, 0x18, 0x00, 0x00 };
   uint8_t ret;
   void *p;
   uint16_t CRCsum;
@@ -66,6 +66,9 @@ wr_read()
   effekta_msg[6] = (unsigned char)(CRCsum & 0xff);
   effekta_msg[7] = (unsigned char)((CRCsum >> 8) & 0xff);
   expected_bytes = (((uint16_t)effekta_msg[4]<<8) + effekta_msg[5]) * 2 + 3;
+  debug_printf("Sending %02x %02x %02x %02x %02x %02x %02x %02x.\n",
+    effekta_msg[0],effekta_msg[1],effekta_msg[2],effekta_msg[3],
+    effekta_msg[4],effekta_msg[5],effekta_msg[6],effekta_msg[7]);
   debug_printf("%d bytes expected.\n",expected_bytes);
   ret = pv_rxstart(effekta_msg,8);
 }
@@ -75,17 +78,17 @@ wr_eval()
 {
   MESSWERT result;
 
-  // Byte 4=H,5=L Current Power output
-  // Byte 22=H,23=L Inverter int. temp
-  // Byte 24=H,25=L Inverter heatsink temp
-  // Byte 26=H,27=L DC1 input voltage
-  // Byte 28=H,29=L DC2 input voltage
-  // Byte 30=H,31=L DC1 input current
-  // Byte 32=H,33=L DC2 input current
-  // Byte 34=H,35=L Input power A
-  // Byte 36=H,37=L Input power B
-  // Byte 38=H,39=L Total output power HIGH word
-  // Byte 40=H,41=L Total output power LOW word
+  // Byte 4=H,5=L 0xC020 Current Power output
+  // Byte 22=H,23=L 0xC029 Inverter int. temp
+  // Byte 24=H,25=L 0xC02A Inverter heatsink temp
+  // Byte 26=H,27=L 0xC02B DC1 input voltage
+  // Byte 28=H,29=L 0xC02C DC2 input voltage
+  // Byte 30=H,31=L 0xC02D DC1 input current
+  // Byte 32=H,33=L 0xC02E DC2 input current
+  // Byte 34=H,35=L 0xC02F Input power A
+  // Byte 36=H,37=L 0xC030 Input power B
+  // Byte 38=H,39=L 0xC031 Total output power HIGH word
+  // Byte 40=H,41=L 0xC032 Total output power LOW word
 
   result.curpow = 10*((((uint32_t)pv_recv_buffer.data[3])<<8) + (uint32_t)pv_recv_buffer.data[4]);
   result.invtemp = (((uint16_t)pv_recv_buffer.data[21])<<8) + (uint16_t)pv_recv_buffer.data[22];
