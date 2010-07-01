@@ -571,6 +571,8 @@ function global_parameters()
     j_wboxtxt2 = "";
     // Werte erstmal willkürlich initialisieren
     monatswerte = new Array(10,20,30,40,50,60,70,80,90,100,110,120);
+    akt_jahr = -1;
+    akt_monat = -1;
     akt_monatswert_bis_gestern = 0;
     //monatstage = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
     tagesnamen = new Array();
@@ -775,15 +777,16 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
 // globalen Arrays zur Verfügung
 // months.dat : Enthält die integrierten Monatsdaten
 // day_hist.dat : Enthält die integrierten Tageswerte
-// min_days.dat : Enthält die Minutenwerte des heutigen Tags
+// day.dat : Enthält die Minutenwerte des heutigen Tags
 
 function update_months_data(str)
 {
-  var i,j,monatsnr,jahr,wert,jahr_vor=999,jahresindex=-1;
+  var i,j,monatsnr,jahr,wert,jahr_vor=999,jahresindex=-1,first_line=true;
   // var     jahresdaten=[[0,0],[0,0]];
   // Zeilen trennen
   tmparr = str.split('\n');
   // i zählt Zeilen, j zählt erfolgr. Daten
+  // Am ersten des Monats
   j = 0;
   for(i=0;i<tmparr.length && i < 24;i++) {
     // Suche 8 Int 0-2 = Datum
@@ -791,12 +794,21 @@ function update_months_data(str)
     if(Ergebnis && Ergebnis.length == 8) {
       monatsnr = parseInt(Ergebnis[1],10) - 1;
       jahr = parseInt(Ergebnis[2],10);
+      // Addiere alle 5 WR-Werte (*1 wg str->int) kann man besser machen
       wert = parseInt(Ergebnis[3],10)+parseInt(Ergebnis[4],10)+parseInt(Ergebnis[5],10)+parseInt(Ergebnis[6],10)+parseInt(Ergebnis[7],10);
       // Nur die 12 letzten Monate anzeigen, aber alle Monate des Vorjahrs in den Jahresertrag mitnehmen
       if(j < 12) {
+	if(first_line) {
+	  if(akt_monat != monatsnr+1) {
+	    akt_monatswert_bis_gestern = 0;
+	    monatsnamen[11] = mnamenlookup[akt_monat-1];
+	    monatswerte[11] = tageswerte[30];
+	    j = 1;
+	  }
+	  first_line=false;
+	}
 	// Hole Monatsnamen zu Monatsstring
 	monatsnamen[11-j] = mnamenlookup[monatsnr];
-	// Addiere alle 5 WR-Werte (*1 wg str->int) kann man besser machen
 	if(j == 0) {
 	  monatswerte[11-j] = wert + tageswerte[30];
 	  akt_monatswert_bis_gestern = wert;
@@ -940,6 +952,8 @@ function update_mins_data(str)
       if(datum_setzen) {
 	tag = parseInt(Erg[0],10);
 	monat = parseInt(Erg[1],10);
+	akt_monat = monat;
+	akt_jahr = parseInt(Erg[2],10);
 	tagestitel = tag+". "+lmnamenlookup[monat-1]+" 20"+Erg[2];
 	tageswerte[30] = (Erg[8]*1)+(Erg[12]*1)+(Erg[16]*1)+(Erg[20]*1)+(Erg[24]*1);
 	tagesnamen[30] = tag+'.'+mnamenlookup[monat-1];
