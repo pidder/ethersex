@@ -44,8 +44,6 @@ function cleanup($dirname,$keep_secs)
       if($current_time - hexdec($arr[0]) > $keep_secs) {
 	$pstr .= "Deleting ".$filename.".<BR>";
 	unlink($dirname.$filename);
-      } else {
-	$pstr .= $filename." not deleted.<BR>";
       }
     }
   }
@@ -229,13 +227,13 @@ if ($datei = fopen ( $in_datei, "r")) {
       $num += 1;
       $summe += $a[0][6];
       if($el_found > 14) {
-	$invtemp += $a[0][7]; // Inverter temp
-	$hstemp += $a[0][8]; // Heatsink temp
-	$dc1v += $a[0][9];
-	$dc2v += $a[0][10];
-	$dc1i += $a[0][11];
-	$dc2i += $a[0][12];
-	$total = $a[0][13]; // Gesamtenergie vom Wechselrichter
+	$invtemp += $a[0][7]; // Inverter temp Grad C
+	$hstemp += $a[0][8]; // Heatsink temp Grad C
+	$dc1v += $a[0][9]; // DC1 Volt
+	$dc2v += $a[0][10]; // DC2 Volt
+	$dc1i += ($a[0][11]/10); // DC1 A
+	$dc2i += ($a[0][12]/10); // DC2 A
+	$total = $a[0][13]; // Gesamtenergie kWh
       }
     } // Ende mindestens sieben Werte gefunden
   } // Ende Fileende erreicht
