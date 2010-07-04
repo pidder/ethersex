@@ -98,6 +98,8 @@ wr_eval()
   result.dc2v = (((uint16_t)pv_recv_buffer.data[27])<<8) + (uint16_t)pv_recv_buffer.data[28];
   result.dc1i = (((uint16_t)pv_recv_buffer.data[29])<<8) + (uint16_t)pv_recv_buffer.data[30];
   result.dc2i = (((uint16_t)pv_recv_buffer.data[31])<<8) + (uint16_t)pv_recv_buffer.data[32];
+  //result.dc1p = (((uint16_t)pv_recv_buffer.data[33])<<8) + (uint16_t)pv_recv_buffer.data[34];
+  //result.dc2p = (((uint16_t)pv_recv_buffer.data[35])<<8) + (uint16_t)pv_recv_buffer.data[36];
   result.totpow = (((uint32_t)pv_recv_buffer.data[37])<<24) + ((uint32_t)pv_recv_buffer.data[38]<<16);
   result.totpow += ((((uint32_t)pv_recv_buffer.data[39])<<8) + (uint32_t)pv_recv_buffer.data[40]);
 

@@ -39,14 +39,26 @@
   <script type="text/ecmascript" xlink:href="solometer.js" />
   <script type="text/ecmascript"> <![CDATA[
     global_parameters();
-    create_graph(tagestitel,"Tag",minutennamen,minutenwerte,1.0);
-    create_graph(monatstitel,"Monat",tagesnamen,tageswerte,0.0);
     create_graph(jahrestitel,"Jahr",monatsnamen,monatswerte,0.0);
+    create_graph(monatstitel,"Monat",tagesnamen,tageswerte,0.0);
+    create_graph(tagestitel,"Tag",minutennamen,minutenwerte,1.0);
 
-    //read_months_data();
-    //read_days_data();
     read_mins_data();
+  ]]></script>
 
+  <svg id="ttbox" x="50" y="50" width="200" height="150" style="visibility: hidden">
+    <rect id="ttr" x="0" y="0" width="200" height="150" style="fill:RoyalBlue; stroke:#000000; stroke-width: 1px; opacity: 0.9" rx="5" ry="5"/>
+    <text id="ttt" x="10" y="2em" style="fill: #FFFFFF; font-size: 11px">Messwerte:
+    <tspan id="t1" x="10" dy="2em">Wandler: </tspan><tspan id="wert" dx="5"> no data </tspan><tspan id="e1" dx="5">C</tspan>
+    <tspan id="t2" x="10" dy="1.2em">Kühlkörper:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e2" dx="5">C</tspan>
+    <tspan id="t3" x="10" dy="1.2em">String 1 Spannung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e3" dx="5">V</tspan>
+    <tspan id="t4" x="10" dy="1.2em">String 2 Spannung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e4" dx="5">V</tspan>
+    <tspan id="t5" x="10" dy="1.2em">String 1 Strom:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e5" dx="5">A</tspan>
+    <tspan id="t6" x="10" dy="1.2em">String 2 Strom:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e6" dx="5">A</tspan>
+    </text>
+  </svg>
+
+  <script type="text/ecmascript"> <![CDATA[
     z=0, k=1; groups = new Array();
     groups[0] = document.getElementById("Tag");
     groups[1] = document.getElementById("Monat");

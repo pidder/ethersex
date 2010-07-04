@@ -29,6 +29,66 @@ WBOXFARBE = "RoyalBlue";
 //    Ende Parameter    *
 //***********************
 
+function ShowTooltip(evt,ide,n)
+{
+  var ttrelem, ttrelem, posx, posy;
+
+  if(dieses.id != ide)
+    return;
+
+  animation_stop = true;
+  //alert("STT: "+n);
+  ttboxelem=document.getElementById("ttbox");
+  ttrelem=document.getElementById("ttr");
+  tttelem=document.getElementById("ttt");
+  var i=0,boxw=0;
+  var hr = 6 + Math.floor(n/12);
+  var mn = (n%12)*5;
+  if(mn < 10)
+    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":0"+mn);
+  else
+    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
+
+  var child = tttelem.firstChild;
+  while (child != null) {
+    if (child.nodeName == "tspan" && child.hasChildNodes()) {
+      if (child.firstChild.nodeType == 3 && child.id == "wert") {
+	  child.firstChild.replaceData(0,100,messwerte[n][i++]);
+      }
+    }
+    child = child.nextSibling;
+  }
+  var posx=evt.pageX;
+  var posy=evt.pageY;
+  var ttboxwidth=ttrelem.getAttribute("width");
+  var ttboxheight=ttrelem.getAttribute("height");
+  
+  if(posx < Fensterweite()-ttboxwidth)
+    ttboxelem.setAttribute("x",posx);
+  else
+    ttboxelem.setAttribute("x",posx-ttboxwidth);
+
+  if(posy < ttboxheight)
+    ttboxelem.setAttribute("y",posy);
+  else
+    ttboxelem.setAttribute("y",posy-ttboxheight);
+
+  ttboxelem.setAttribute("style","visibility: visible");
+}
+
+function HideTooltip()
+{
+  var ttrelem, ttrelem;
+  //alert("HTT");
+  ttboxelem=document.getElementById("ttbox");
+  //ttrelem=document.getElementById("ttr");
+  //tttelem=document.getElementById("ttt");
+  ttboxelem.setAttribute("style","visibility: hidden");
+  //ttrelem.setAttribute("style","visibility: hidden");
+  //tttelem.setAttribute("style","visibility: hidden");
+  animation_stop = false;
+}
+
 // Window-Resize detektieren und Fenstergroesse anpassen
 function Fensterweite () {
   if (window.innerWidth) {
@@ -347,6 +407,10 @@ function create_graph(titel,ident,namen,werte,opacity)
     shape.setAttributeNS(null, "stroke", "#000000");
     shape.setAttributeNS(null, "stroke-width", "1");
     shape.setAttributeNS(null, "fill", "yellow");
+    if(ident == "Tag") {
+      shape.setAttributeNS(null, "onmouseover", "ShowTooltip(evt,\""+ident+"\","+i+")");
+      shape.setAttributeNS(null, "onmouseout", "HideTooltip()");
+    }
     gruppe.appendChild(shape);
   }
 
@@ -583,6 +647,10 @@ function global_parameters()
     }
     minutennamen = new Array();
     minutenwerte = new Array();
+    messwerte = new Array();
+    for (i = 0; i < 180; i++)
+      messwerte[i] = new Array(10);
+
     // 6:00 bis 21:00
     // Bin 0 = 6:00 - 6:05 usw.
     for(i=0;i<180;i++) {
@@ -627,6 +695,7 @@ function global_parameters()
     }
     // Länge der Tick-Striche
     ticklength = 5;
+  animation_stop = false;
 }
 
 // Trage nachgeladene Daten in Graph ein
@@ -970,6 +1039,7 @@ function update_mins_data(str)
   }
   monatstitel = lmnamenlookup[((monat-2)>=0?monat-2:11)]+' / '+lmnamenlookup[monat-1];
   update_graph("Tag",minutennamen,minutenwerte,tagestitel,tag_last,t_wboxtxt1,t_wboxtxt2);
+  read_meas_data();
   if(tag != vortag) {
     vortag = tag;
     // Der Datenupdate muss am Morgen evtl. mehrmals wiederholt werden bis alle Files aktualisiert sind
@@ -1018,9 +1088,55 @@ function read_mins_data()
   setTimeout("read_mins_data()",300000);
 }
 
+// Liest und verarbeitet die zus. Messdaten
+function update_meas_data(str)
+{
+  var i;
+
+  // Array initialisieren
+  tmparr2 = str.split('\n');
+  for(i=0;i<tmparr2.length;i++) {
+    // Suche 12 Int 0-2 = Datum, 3 - 5 = Zeit
+    Erg = tmparr2[i].match(/[0-9]+/g);
+    if(Erg && Erg.length > 11) {
+      ind = (parseInt(Erg[3])-6)*12 + parseInt(Erg[4])/5;
+      if(ind >= 0 && ind < 180) {
+	messwerte[ind][0] = parseInt(Erg[6]);
+	messwerte[ind][1] = parseInt(Erg[7]);
+	messwerte[ind][2] = parseInt(Erg[8]);
+	messwerte[ind][3] = parseInt(Erg[9]);
+	messwerte[ind][4] = parseFloat(Erg[10])/10.0;
+	messwerte[ind][5] = parseFloat(Erg[11])/10.0;
+      }
+    }
+  }
+}
+
+function read_meas_data()
+{
+  var req = new XMLHttpRequest(),dateiname;
+  // Caching umgehen...Ok, so ist's suboptimal.
+  dateiname='meas.dat?'+Math.random();
+  req.open('GET', dateiname, true);
+  // Eigentlich sollte man den cache so umgehen. Das funktioniert aber nicht zuverlässig.
+  //req.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+  req.onreadystatechange = function (aEvt) {
+    if (req.readyState == 4) {
+      if(req.status == 200) {
+	update_meas_data(req.responseText);
+      }
+    }
+  }
+  req.send(null);
+}
+
 // Diese Funktion sorgt für den Bildwechsel und das Überblenden der Graphen
 function animiere()
 {
+  if(animation_stop) {
+    setTimeout("animiere()", 100);
+    return;
+  }
   // Setze neue Werte für die Opazität
   dieses.setAttributeNS(null, "fill-opacity", 1-z/30);
   dieses.setAttributeNS(null, "stroke-opacity", 1-z/30);
