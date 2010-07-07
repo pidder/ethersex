@@ -1,0 +1,75 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 
+*
+*
+* Copyright (c) 2010 by Peter Hartmann <solometerklammeraffehartmann-peter.de>
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 3
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*
+* For more information on the GPL, please go to:
+* http://www.gnu.org/copyleft/gpl.html
+*
+-->
+<svg
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns="http://www.w3.org/2000/svg"
+  version="1.1">
+
+  <filter id = "Schatten" width = "150%" height = "150%">
+    <feOffset result = "offOut" in = "SourceGraphic" dx = "10" dy = "15"/>
+    <feGaussianBlur result = "blurOut" in = "offOut" stdDeviation = "5"/>
+    <feBlend in = "SourceGraphic" in2 = "blurOut" mode = "normal"/>
+  </filter>
+
+  <script type="text/ecmascript" xlink:href="solometer1.js" />
+  <script type="text/ecmascript"> <![CDATA[
+    global_parameters();
+    create_graph(jahrestitel,"Jahr",monatsnamen,monatswerte,0.0);
+    create_graph(monatstitel,"Monat",tagesnamen,tageswerte,0.0);
+    create_graph(tagestitel,"Tag",minutennamen,minutenwerte,1.0);
+
+    read_mins_data();
+  ]]></script>
+
+  <svg id="ttbox" x="50" y="50" width="200" height="200" style="visibility: hidden">
+    <rect id="ttr" x="0" y="0" width="200" height="200" style="fill:RoyalBlue; stroke:#000000; stroke-width: 1px; opacity: 0.9" rx="5" ry="5"/>
+    <text id="ttt" x="10" y="2em" style="fill: #FFFFFF; font-size: 11px">Messwerte:
+    <tspan id="t1" x="10" dy="2em">Wandler Temperatur: </tspan><tspan id="wert" dx="5"> no data </tspan><tspan id="e1" dx="5">C</tspan>
+    <tspan id="t2" x="10" dy="1.2em">Kühlkörper Temperatur:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e2" dx="5">C</tspan>
+    <tspan id="t3" x="10" dy="1.2em">String 1 Spannung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e3" dx="5">V</tspan>
+    <tspan id="t4" x="10" dy="1.2em">String 2 Spannung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e4" dx="5">V</tspan>
+    <tspan id="t5" x="10" dy="1.2em">String 1 Strom:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e5" dx="5">A</tspan>
+    <tspan id="t6" x="10" dy="1.2em">String 2 Strom:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e6" dx="5">A</tspan>
+    <tspan id="t7" x="10" dy="1.2em">String 1 DC Leistung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e7" dx="5">W</tspan>
+    <tspan id="t8" x="10" dy="1.2em">String 2 DC Leistung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e8" dx="5">W</tspan>
+    <tspan id="t9" x="10" dy="1.2em">AC Leistung:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e9" dx="5">W</tspan>
+    <tspan id="t10" x="10" dy="1.2em">Effizienz:</tspan><tspan id="wert" dx="5">no data</tspan><tspan id="e10" dx="5">%</tspan>
+    </text>
+  </svg>
+
+  <script type="text/ecmascript"> <![CDATA[
+    z=0, k=1; groups = new Array();
+    groups[0] = document.getElementById("Tag");
+    groups[1] = document.getElementById("Monat");
+    groups[2] = document.getElementById("Jahr");
+    dieses = groups[0];
+    naechstes = groups[1];
+
+    setTimeout("animiere()", ANZEIGEDAUER*1000);
+  ]]></script>
+</svg>
