@@ -92,14 +92,13 @@ wr_eval()
 
   result.curpow = 10*((((uint32_t)pv_recv_buffer.data[3])<<8) + (uint32_t)pv_recv_buffer.data[4]);
   result.invtemp = (((uint16_t)pv_recv_buffer.data[21])<<8) + (uint16_t)pv_recv_buffer.data[22];
-  //result.invtemp = pv_recv_buffer.len;
   result.hstemp = (((uint16_t)pv_recv_buffer.data[23])<<8) + (uint16_t)pv_recv_buffer.data[24];
   result.dc1v = (((uint16_t)pv_recv_buffer.data[25])<<8) + (uint16_t)pv_recv_buffer.data[26];
   result.dc2v = (((uint16_t)pv_recv_buffer.data[27])<<8) + (uint16_t)pv_recv_buffer.data[28];
   result.dc1i = (((uint16_t)pv_recv_buffer.data[29])<<8) + (uint16_t)pv_recv_buffer.data[30];
   result.dc2i = (((uint16_t)pv_recv_buffer.data[31])<<8) + (uint16_t)pv_recv_buffer.data[32];
-  //result.dc1p = (((uint16_t)pv_recv_buffer.data[33])<<8) + (uint16_t)pv_recv_buffer.data[34];
-  //result.dc2p = (((uint16_t)pv_recv_buffer.data[35])<<8) + (uint16_t)pv_recv_buffer.data[36];
+  result.dc1p = 10*((((uint16_t)pv_recv_buffer.data[33])<<8) + (uint16_t)pv_recv_buffer.data[34]);
+  result.dc2p = 10*((((uint16_t)pv_recv_buffer.data[35])<<8) + (uint16_t)pv_recv_buffer.data[36]);
   result.totpow = (((uint32_t)pv_recv_buffer.data[37])<<24) + ((uint32_t)pv_recv_buffer.data[38]<<16);
   result.totpow += ((((uint32_t)pv_recv_buffer.data[39])<<8) + (uint32_t)pv_recv_buffer.data[40]);
 

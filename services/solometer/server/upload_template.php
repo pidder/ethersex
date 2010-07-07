@@ -118,6 +118,8 @@ $dc1v = 0;
 $dc2v = 0;
 $dc1i = 0;
 $dc2i = 0;
+$dc1p = 0;
+$dc2p = 0;
 $total = 0;
 //$in_datei = $_FILES["file"]["name"];
 $in_datei = $uploadpath.$_FILES["file"]["name"];
@@ -226,14 +228,16 @@ if ($datei = fopen ( $in_datei, "r")) {
       // Summiere Messwert
       $num += 1;
       $summe += $a[0][6];
-      if($el_found > 14) {
+      if($el_found > 16) {
 	$invtemp += $a[0][7]; // Inverter temp Grad C
 	$hstemp += $a[0][8]; // Heatsink temp Grad C
 	$dc1v += $a[0][9]; // DC1 Volt
 	$dc2v += $a[0][10]; // DC2 Volt
-	$dc1i += ($a[0][11]/10); // DC1 A
-	$dc2i += ($a[0][12]/10); // DC2 A
-	$total = $a[0][13]; // Gesamtenergie kWh
+	$dc1i += ($a[0][11]); // DC1 A
+	$dc2i += ($a[0][12]); // DC2 A
+	$dc1p += ($a[0][13]); // DC1 Wh
+	$dc2p += ($a[0][14]); // DC2 Wh
+	$total = $a[0][15]; // Gesamtenergie kWh
       }
     } // Ende mindestens sieben Werte gefunden
   } // Ende Fileende erreicht
@@ -263,13 +267,13 @@ if((file_exists($meas_datei)) && (($fs = filesize($meas_datei)) > 0)) {
   $str = fread ($datei, $fs);
   rewind($datei);
   fputs($datei,$datum."|".intval($invtemp/$num).";".intval($hstemp/$num).";".intval($dc1v/$num).";");
-  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num)."\n");
+  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num).";".intval($dc1p/$num).";".intval($dc2p/$num)."\n");
   fwrite($datei,$str);
   fclose($datei);
 } else { // Falls Datei nicht existiert, neu erzeugen
   $datei = fopen ($meas_datei, "a+");
   fputs($datei,$datum."|".intval($invtemp/$num).";".intval($hstemp/$num).";".intval($dc1v/$num).";");
-  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num)."\n");
+  fputs($datei,intval($dc2v/$num).";".intval($dc1i/$num).";".intval($dc2i/$num).";".intval($dc1p/$num).";".intval($dc2p/$num)."\n");
   //fputs($datei,$datum." ".$summe/$num."\n");
   fclose($datei);
 }

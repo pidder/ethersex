@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include "services/clock/clock.h"
+#include "protocols/uip/uip.h"
 #include "services/solometer/pv.h"
 
 MESSWERT messpuf[MESSPUFSIZE];
@@ -38,6 +39,7 @@ messen(MESSWERT messwert)
 {
   struct clock_datetime_t zeit;
   static struct clock_datetime_t zeit_vor = {0,{{0,0,0,0,0}},0};
+  uip_ipaddr_t ntp_ipaddr;
 
   debug_printf("Messen aufgerufen.\n");
 
@@ -50,10 +52,26 @@ messen(MESSWERT messwert)
   messpuf[0].zeitstempel = clock_get_time(); // UTC
   clock_localtime(&zeit, messpuf[0].zeitstempel);
 
-  // Uhrzeit nicht aktuell (Läuft der NTP daemon nicht?)
+  // Uhrzeit nicht aktuell (DNS??)
   if(zeit.year < 110) {
     debug_printf("Uhr nicht gestellt.\n");
 #   ifndef SOLOMETER_WEB_DEBUG
+    if(zeit.min > 1) {
+      debug_printf("Trying PTB server 1.\n");
+      // Try PTB servers ptbtime1.ptb.de ptbtime2.ptb.de
+      // 192.53.103.108 und 192.53.103.104
+      uip_ipaddr(&ntp_ipaddr, 192,53,103,108);
+      ntp_conf(ntp_ipaddr);
+      ntp_send_packet();
+    }
+    if(zeit.min > 2) {
+      debug_printf("Trying PTB server 2.\n");
+      // Try PTB servers ptbtime1.ptb.de ptbtime2.ptb.de
+      // 192.53.103.108 und 192.53.103.104
+      uip_ipaddr(&ntp_ipaddr, 192,53,103,104);
+      ntp_conf(ntp_ipaddr);
+      ntp_send_packet();
+    }
     //Reboot, if no NTP conn. after 10 mins
     if(zeit.min > 10)
       status.request_reset = 1;
@@ -79,6 +97,8 @@ messen(MESSWERT messwert)
   messpuf[0].dc2v += messwert.dc2v;
   messpuf[0].dc1i += messwert.dc1i;
   messpuf[0].dc2i += messwert.dc2i;
+  messpuf[0].dc1p += messwert.dc1p;
+  messpuf[0].dc2p += messwert.dc2p;
   messpuf[0].totpow = messwert.totpow;
   mwindex += 1;
 
@@ -95,6 +115,8 @@ messen(MESSWERT messwert)
       messpuf[0].dc2v /= mwindex;
       messpuf[0].dc1i /= mwindex;
       messpuf[0].dc2i /= mwindex;
+      messpuf[0].dc1p /= mwindex;
+      messpuf[0].dc2p /= mwindex;
       messpuf[0].nummeas = mwindex;
     }
     // Alle Werte vor diesem Wert speichern 
@@ -110,6 +132,8 @@ messen(MESSWERT messwert)
     messpuf[0].dc2v = 0;
     messpuf[0].dc1i = 0;
     messpuf[0].dc2i = 0;
+    messpuf[0].dc1p = 0;
+    messpuf[0].dc2p = 0;
     messpuf[0].totpow = 0;
     zeit_vor = zeit;
   }

@@ -67,7 +67,7 @@ void mcp_net_main()
   MESSWERT tmpwert;
   struct clock_datetime_t zeit;
 
-  puffer = (char *)malloc(90);
+  puffer = (char *)malloc(96);
   if(!puffer) {
     debug_printf("mcp_net_main: not enough memory!\n");
     return;
@@ -132,8 +132,8 @@ void mcp_net_main()
     clock_localtime(&zeit,tmpwert.zeitstempel);
     j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu "),zeit.day,zeit.month,
 	  zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
-    j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
-	  tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.totpow,tmpwert.nummeas);
+    j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %lu %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
+	  tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.dc1p,tmpwert.dc2p,tmpwert.totpow,tmpwert.nummeas);
     while((p-(char *)uip_sappdata + j < uip_mss()) && (post_data.stage == PV_DATA)) {
       //debug_printf("p:%u rbp:%u %u.%u.%u %u:%u:%u UTC\n",p-(char *)uip_sappdata,rbp,zeit.day,
 	//zeit.month,zeit.year+1900,zeit.hour,zeit.min,zeit.sec);
@@ -149,8 +149,8 @@ void mcp_net_main()
 	clock_localtime(&zeit,tmpwert.zeitstempel);
 	j = sprintf_P(puffer,PSTR("%u.%u.%u %u:%u:%u %lu "),zeit.day,zeit.month,
 	    zeit.year-100,zeit.hour,zeit.min,zeit.sec,tmpwert.curpow);
-	j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
-	    tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.totpow,tmpwert.nummeas);
+	j += sprintf_P(puffer+j,PSTR("%u %u %u %u %u %u %lu %lu %lu %u\n"),tmpwert.invtemp,tmpwert.hstemp,
+	    tmpwert.dc1v,tmpwert.dc2v,tmpwert.dc1i,tmpwert.dc2i,tmpwert.dc1p,tmpwert.dc2p,tmpwert.totpow,tmpwert.nummeas);
       }
     }
     post_data.length = p-(char *)uip_sappdata;

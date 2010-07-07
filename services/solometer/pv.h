@@ -43,8 +43,8 @@ typedef struct {
     uint16_t dc2v;
     uint16_t dc1i;
     uint16_t dc2i;
-    //uint16_t dc1p
-    //uint16_t dc2p
+    uint32_t dc1p;
+    uint32_t dc2p;
     uint32_t totpow;
     uint16_t nummeas;
 } MESSWERT;
