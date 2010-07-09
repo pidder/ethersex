@@ -36,8 +36,7 @@ MESSWERT sendpuf[MESSPUFSIZE];
 uint16_t spindex = 0;
 
 char post_hostname[64];
-uip_ipaddr_t post_ipaddr, *post_ipaddr_p;
-char post_hostip[16];
+uip_ipaddr_t post_hostip, *post_hostip_p;
 char post_scriptname[64];
 char post_filename[16] = {'1','2','3','4','5','6','7','8','.','M','C','P',0};
 char post_cookie[16];
@@ -204,15 +203,15 @@ mcp_net_init()
   // Falls noch keine Verbindung besteht ist post_conn=NULL
   if (! post_conn) {
 #ifdef DNS_SUPPORT
-    if (! (post_ipaddr_p = resolv_lookup(post_hostname))) {
+    if (! (post_hostip_p = resolv_lookup(post_hostname))) {
       debug_printf("Hostname unknown. Starting Query.\n");
       resolv_query(post_hostname, mcp_net_connect);
     } else {
       debug_printf("Hostname known. Connecting...\n");
-      mcp_net_connect(post_hostname, post_ipaddr_p);
+      mcp_net_connect(post_hostname, post_hostip_p);
     }
 #else
-    mcp_net_connect("Webhost", &post_ipaddr);
+    mcp_net_connect("Webhost", &post_hostip);
 #endif
   }
   return;

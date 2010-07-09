@@ -26,9 +26,11 @@
 #include "core/eeprom.h"
 #include "protocols/uip/uip.h"
 #include "protocols/uip/parse.h"
+#include "protocols/dns/resolv.h"
 
-extern char post_hostname[], post_hostip[], post_scriptname[], post_cookie[];
-extern char solometer_host[], solometer_cookie[], solometer_hostip[], solometer_script[];
+extern char post_hostname[], post_scriptname[], post_cookie[];
+extern uip_ipaddr_t post_hostip,solometer_hostip;
+extern char solometer_host[], solometer_cookie[], solometer_script[];
 
 struct param {
   char *desc;

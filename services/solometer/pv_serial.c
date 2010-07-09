@@ -36,7 +36,7 @@ generate_usart_init()
 
 extern char post_hostname[];
 extern char post_cookie[];
-extern uip_ipaddr_t post_ipaddr;
+extern uip_ipaddr_t post_hostip;
 extern char post_scriptname[];
 
 struct pv_serial_buffer pv_recv_buffer;
@@ -66,12 +66,15 @@ pv_init()
   static int ip1,ip2,ip3,ip4;
   n = sscanf(post_hostip,"%d.%d.%d.%d",&ip1,&ip2,&ip3,&ip4);
   if(n == 4) {
-    uip_ipaddr(&post_ipaddr,ip1,ip2,ip3,ip4);
+    uip_ipaddr(&post_hostip,ip1,ip2,ip3,ip4);
     debug_printf("Set webhost_ip to %d.%d.%d.%d\n",ip1,ip2,ip3,ip4);
   } else {
     debug_printf("Webhost IP scan failed: n=%d %d %d %d %d\n",n,ip1,ip2,ip3,ip4);
   }*/
 //#endif //PV_WEBHOST_IP
+  memset(post_hostip,0,sizeof(uip_ipaddr_t));
+  eeprom_restore(solometer_hostip, post_hostip, sizeof(uip_ipaddr_t));
+
 //#ifdef PV_SOLOMETER_ID
   memset(post_cookie,0,11);
   eeprom_restore(solometer_cookie, post_cookie, 10);

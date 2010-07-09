@@ -21,6 +21,7 @@
 */
 
 #include "handle_solometer.h"
+#include "protocols/uip/parse.h"
 
 // Parameters to be set by the Web-Frontend
 /*#define NUM_PAR 4
@@ -121,7 +122,16 @@ int urldecode(char* ptr)
 int8_t
 solometer_parse (char* ptr)
 {
-  char *str,*ptr1,*ptr2,c;
+  char *str,*ptr1,*ptr2,c,*buf;
+  uip_ipaddr_t dnsserver;
+  int n;
+  int16_t *int1_p,*int2_p,*int3_p,*int4_p;
+
+  buf=(char*)malloc(24);
+  int1_p = (int16_t*)(buf+16);
+  int2_p = (int16_t*)(buf+18);
+  int3_p = (int16_t*)(buf+20);
+  int4_p = (int16_t*)(buf+22);
 
   ptr1 = strchr (ptr, ' ');
   if (ptr1 == NULL) {
@@ -176,7 +186,66 @@ solometer_parse (char* ptr)
   }
 
   debug_printf("Ausgewertet:HST=--%s--\n",post_hostname);
-  
+
+  ptr1 = strstr_P(ptr,PSTR("HIP="));
+  if(ptr1 != NULL) {
+    ptr1 += 4;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(buf,ptr1,16);
+      *ptr2 = c;
+      buf[15] = 0;
+
+      n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
+      if(n == 4) {
+	debug_printf("Setting Host IP: %d %d %d %d\n",*int1_p,*int2_p,*int3_p,*int4_p);
+	uip_ipaddr(&post_hostip,*int1_p,*int2_p,*int3_p,*int4_p);
+	eeprom_save(solometer_hostip, post_hostip, sizeof(uip_ipaddr_t));
+	eeprom_update_chksum();
+      } else {
+	debug_printf("Not setting Host IP (n <> 4).\n");
+	uip_ipaddr(&post_hostip,0,0,0,0);
+      }
+      memset(buf,0,16);
+      print_ipaddr(&post_hostip,buf,16);
+      buf[15]=0;
+    }
+  }
+
+  debug_printf("Ausgewertet:HIP=--%s--\n",buf);
+
+  ptr1 = strstr_P(ptr,PSTR("DNS="));
+  if(ptr1 != NULL) {
+    ptr1 += 4;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(buf,ptr1,16);
+      *ptr2 = c;
+      buf[15] = 0;
+
+      n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
+      if(n == 4) {
+	debug_printf("Setting DNS server IP\n");
+	uip_ipaddr(&dnsserver,*int1_p,*int2_p,*int3_p,*int4_p);
+	eeprom_save(dns_server, &dnsserver, sizeof(uip_ipaddr_t));
+	eeprom_update_chksum();
+	resolv_conf(&dnsserver);
+      } else {
+	debug_printf("Not setting DNS server IP (n <> 4).\n");
+	uip_ipaddr(&dnsserver,0,0,0,0);
+      }
+      memset(buf,0,16);
+      print_ipaddr(&dnsserver,buf,16);
+      buf[15]=0;
+    }
+  }
+
+  debug_printf("Ausgewertet:DNS=--%s--\n",buf);
+
   ptr1 = strstr_P(ptr,PSTR("SCR="));
   if(ptr1 != NULL) {
     ptr1 += 4;
@@ -194,6 +263,7 @@ solometer_parse (char* ptr)
 
   debug_printf("Ausgewertet:SCRPT=--%s--\n",post_scriptname);
   free(ptr);
+  free(buf);
   return 0;
 }
 
@@ -203,8 +273,8 @@ httpd_handle_solometer (void)
   static int8_t i = 0;
   static uint8_t cont_send = 0, parsing = 0;
   uint16_t mss;
-  uip_ipaddr_t hostaddr;
-  //char *p;
+  uip_ipaddr_t hostaddr,dnsserver;
+  char *buf;
 
   debug_printf("Handle_solometer called.\n");
   mss = uip_mss();
@@ -350,10 +420,32 @@ httpd_handle_solometer (void)
 	  PASTE_SEND();
 	  break;
 	} else {
+	  buf=(char*)malloc(16);
+	  print_ipaddr(&post_hostip,buf,16);
+	  buf[15]=0;
+	  snprintf_P(uip_appdata + strlen(uip_appdata),50, PSTR("  <p>Webhost IP (optional) [%s"),buf);
+	  cont_send++;
+	  free(buf);
+	}
+      case 10:
+	if(strlen(uip_appdata) + 75 > mss) {
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(PSTR("]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"));
+	  cont_send++;
+	}
+      case 11:
+	if(strlen(uip_appdata) + 90 > mss) {
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
 	  snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Script [%s"),post_scriptname);
 	  cont_send++;
 	}
-      case 10:
+      case 12:
 	if(strlen(uip_appdata) + 75 > mss) {
 	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
@@ -362,7 +454,30 @@ httpd_handle_solometer (void)
 	  PASTE_P(PSTR("]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
 	  cont_send++;
 	}
-      case 11:
+      case 13:
+	if(strlen(uip_appdata) + 90 > mss) {
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  buf=(char*)malloc(16);
+	  eeprom_restore(dns_server, &dnsserver, IPADDR_LEN);
+	  print_ipaddr(&dnsserver,buf,16);
+	  buf[15]=0;
+	  snprintf_P(uip_appdata + strlen(uip_appdata),50, PSTR("  <p>DNS Server IP [%s"),buf);
+	  cont_send++;
+	  free(buf);
+	}
+      case 14:
+	if(strlen(uip_appdata) + 75 > mss) {
+	  debug_printf("%d: %s\n",cont_send,uip_appdata);
+	  PASTE_SEND();
+	  break;
+	} else {
+	  PASTE_P(PSTR("]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"));
+	  cont_send++;
+	}
+      case 15:
 	if(strlen(uip_appdata) + strlen_P(p3) > mss) {
 	  debug_printf("%d: %s\n",cont_send,uip_appdata);
 	  PASTE_SEND();
