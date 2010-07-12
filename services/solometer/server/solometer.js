@@ -58,7 +58,7 @@ function ShowTooltip(evt,ide,n)
   else
     tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
 
-  tttelem.firstChild.replaceData(0,100,"Id: "+ide);
+  //tttelem.firstChild.replaceData(0,100,"Id: "+ide);
 
   i = 0;
   var child = tttelem.firstChild;
@@ -1113,16 +1113,16 @@ function update_meas_data(str)
     // Suche 12 Int 0-2 = Datum, 3 - 5 = Zeit
     Erg = tmparr2[i].match(/[0-9]+/g);
     if(Erg && Erg.length > 13) {
-      ind = (parseInt(Erg[3])-6)*12 + parseInt(Erg[4])/5;
+      ind = (parseInt(Erg[3],10)-6)*12 + parseInt(Erg[4],10)/5;
       if(ind >= 0 && ind < 180) {
-	messwerte[ind][0] = parseInt(Erg[6]);
-	messwerte[ind][1] = parseInt(Erg[7]);
-	messwerte[ind][2] = parseInt(Erg[8]);
-	messwerte[ind][3] = parseInt(Erg[9]);
-	messwerte[ind][4] = parseFloat(Erg[10])/10.0;
-	messwerte[ind][5] = parseFloat(Erg[11])/10.0;
-	messwerte[ind][6] = parseFloat(Erg[12]);
-	messwerte[ind][7] = parseFloat(Erg[13]);
+	messwerte[ind][0] = parseInt(Erg[6],10);
+	messwerte[ind][1] = parseInt(Erg[7],10);
+	messwerte[ind][2] = parseInt(Erg[8],10);
+	messwerte[ind][3] = parseInt(Erg[9],10);
+	messwerte[ind][4] = parseFloat(Erg[10],10)/10.0;
+	messwerte[ind][5] = parseFloat(Erg[11],10)/10.0;
+	messwerte[ind][6] = parseFloat(Erg[12],10);
+	messwerte[ind][7] = parseFloat(Erg[13],10);
 	messwerte[ind][8] = minutenwerte[ind];
 	messwerte[ind][9] = Math.floor(100.0*minutenwerte[ind]/(messwerte[ind][6]+messwerte[ind][7])+0.5);
       }
