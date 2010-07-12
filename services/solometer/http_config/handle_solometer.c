@@ -119,6 +119,26 @@ int urldecode(char* ptr)
 }
 // END Decode GET Method-sent Form data
 
+int get_string(char *ptr, const char *pattern, char target[], int len)
+{
+  char *ptr1,*ptr2,c;
+
+  target[0] = 0;
+  ptr1 = strstr_P(ptr,pattern);
+  if(ptr1 != NULL) {
+    ptr1 += 4;
+    ptr2 = strchrnul(ptr1,'&');
+    if(ptr2 != ptr1) {
+      c = *ptr2;
+      *ptr2 = 0;
+      ptr1 = strncpy(target,ptr1,len);
+      *ptr2 = c;
+      target[len-1] = 0;
+    }
+  }
+  return(strlen(target));
+}
+
 int8_t
 solometer_parse (char* ptr)
 {
@@ -127,7 +147,12 @@ solometer_parse (char* ptr)
   int n;
   int16_t *int1_p,*int2_p,*int3_p,*int4_p;
 
-  buf=(char*)malloc(24);
+  //buf=(char*)malloc(24);
+  if(!(buf=(char*)malloc(24))) {
+    debug_printf("smt_parse: Not enough memory!\n");
+    return -1;
+  }
+  
   int1_p = (int16_t*)(buf+16);
   int2_p = (int16_t*)(buf+18);
   int3_p = (int16_t*)(buf+20);
@@ -143,125 +168,73 @@ solometer_parse (char* ptr)
   c = *ptr1;
   *ptr1 = 0;
   if(!(str = malloc(strlen(ptr) + 1))) {
-    debug_printf("Not enough memory. Exiting.\n");
+    debug_printf("smt_parse: Not enough memory. Exiting.\n");
     *ptr1 = c;
     return -1;
   }
   ptr = strcpy(str,ptr);
   *ptr1 = c;
 
-  debug_printf("String to parse: --%s--\n",ptr);
   urldecode(ptr);
-  
-  ptr1 = strstr_P(ptr,PSTR("ID="));
-  if(ptr1 != NULL) {
-    ptr1 += 3;
-    ptr2 = strchrnul(ptr1,'&');
-    if(ptr2 != ptr1) {
-      c = *ptr2;
-      *ptr2 = 0;
-      ptr1 = strncpy(post_cookie,ptr1,10);
-      *ptr2 = c;
-      post_cookie[10] = 0;
-      eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);
-      eeprom_update_chksum();
-    }
-  }
+  debug_printf("String to parse: --%s--\n",ptr);
 
+  if(get_string(ptr,PSTR("ID="),post_cookie,11)) {
+    eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);
+    eeprom_update_chksum();
+  }
   debug_printf("Ausgewertet:PVID=--%s--\n",post_cookie);
-  
-  ptr1 = strstr_P(ptr,PSTR("HST="));
-  if(ptr1 != NULL) {
-    ptr1 += 4;
-    ptr2 = strchrnul(ptr1,'&');
-    if(ptr2 != ptr1) {
-      c = *ptr2;
-      *ptr2 = 0;
-      ptr1 = strncpy(post_hostname,ptr1,63);
-      *ptr2 = c;
-      post_hostname[63] = 0;
-      eeprom_save(solometer_host, post_hostname, strlen(post_hostname) + 1);
-      eeprom_update_chksum();
-    }
-  }
 
+  if(get_string(ptr,PSTR("HST="),post_hostname,64)) {
+    eeprom_save(solometer_host, post_hostname, strlen(post_hostname) + 1);
+    eeprom_update_chksum();
+  }
   debug_printf("Ausgewertet:HST=--%s--\n",post_hostname);
 
-  ptr1 = strstr_P(ptr,PSTR("HIP="));
-  if(ptr1 != NULL) {
-    ptr1 += 4;
-    ptr2 = strchrnul(ptr1,'&');
-    if(ptr2 != ptr1) {
-      c = *ptr2;
-      *ptr2 = 0;
-      ptr1 = strncpy(buf,ptr1,16);
-      *ptr2 = c;
-      buf[15] = 0;
+  if(get_string(ptr,PSTR("SCR="),post_scriptname,64)) {
+    eeprom_save(solometer_script, post_scriptname, strlen(post_scriptname) + 1);
+    eeprom_update_chksum();
+  }
+  debug_printf("Ausgewertet:SCRPT=--%s--\n",post_scriptname);
 
-      n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
-      if(n == 4) {
-	debug_printf("Setting Host IP: %d %d %d %d\n",*int1_p,*int2_p,*int3_p,*int4_p);
-	uip_ipaddr(&post_hostip,*int1_p,*int2_p,*int3_p,*int4_p);
-	eeprom_save(solometer_hostip, post_hostip, sizeof(uip_ipaddr_t));
-	eeprom_update_chksum();
-      } else {
-	debug_printf("Not setting Host IP (n <> 4).\n");
-	uip_ipaddr(&post_hostip,0,0,0,0);
-      }
+  if(get_string(ptr,PSTR("HIP="),buf,16)) {
+    n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
+    if(n == 4) {
+      debug_printf("Setting Host IP: %d %d %d %d\n",*int1_p,*int2_p,*int3_p,*int4_p);
+      uip_ipaddr(&post_hostip,*int1_p,*int2_p,*int3_p,*int4_p);
+      eeprom_save(solometer_hostip, post_hostip, sizeof(uip_ipaddr_t));
+      eeprom_update_chksum();
       memset(buf,0,16);
       print_ipaddr(&post_hostip,buf,16);
       buf[15]=0;
+    } else {
+      debug_printf("Not setting Host IP (n != 4).\n");
+      buf[0] = 0;
     }
+  } else {
+    buf[0] = 0;
   }
-
   debug_printf("Ausgewertet:HIP=--%s--\n",buf);
 
-  ptr1 = strstr_P(ptr,PSTR("DNS="));
-  if(ptr1 != NULL) {
-    ptr1 += 4;
-    ptr2 = strchrnul(ptr1,'&');
-    if(ptr2 != ptr1) {
-      c = *ptr2;
-      *ptr2 = 0;
-      ptr1 = strncpy(buf,ptr1,16);
-      *ptr2 = c;
-      buf[15] = 0;
-
-      n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
-      if(n == 4) {
-	debug_printf("Setting DNS server IP\n");
-	uip_ipaddr(&dnsserver,*int1_p,*int2_p,*int3_p,*int4_p);
-	eeprom_save(dns_server, &dnsserver, sizeof(uip_ipaddr_t));
-	eeprom_update_chksum();
-	resolv_conf(&dnsserver);
-      } else {
-	debug_printf("Not setting DNS server IP (n <> 4).\n");
-	uip_ipaddr(&dnsserver,0,0,0,0);
-      }
+  if(get_string(ptr,PSTR("DNS="),buf,16)) {
+    n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
+    if(n == 4) {
+      debug_printf("Setting DNS server IP\n");
+      uip_ipaddr(&dnsserver,*int1_p,*int2_p,*int3_p,*int4_p);
+      eeprom_save(dns_server, &dnsserver, sizeof(uip_ipaddr_t));
+      eeprom_update_chksum();
+      resolv_conf(&dnsserver);
       memset(buf,0,16);
       print_ipaddr(&dnsserver,buf,16);
       buf[15]=0;
+    } else {
+      debug_printf("Not setting DNS server IP (n <> 4).\n");
+      buf[0] = 0;
     }
+  } else {
+    buf[0] = 0;
   }
-
   debug_printf("Ausgewertet:DNS=--%s--\n",buf);
 
-  ptr1 = strstr_P(ptr,PSTR("SCR="));
-  if(ptr1 != NULL) {
-    ptr1 += 4;
-    ptr2 = strchrnul(ptr1,'&');
-    if(ptr2 != ptr1) {
-      c = *ptr2;
-      *ptr2 = 0;
-      ptr1 = strncpy(post_scriptname,ptr1,63);
-      *ptr2 = c;
-      post_scriptname[63] = 0;
-      eeprom_save(solometer_script, post_scriptname, strlen(post_scriptname) + 1);
-      eeprom_update_chksum();
-    }
-  }
-
-  debug_printf("Ausgewertet:SCRPT=--%s--\n",post_scriptname);
   free(ptr);
   free(buf);
   return 0;
