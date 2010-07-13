@@ -24,6 +24,7 @@
 #include "services/clock/clock.h"
 #include "protocols/uip/uip.h"
 #include "services/solometer/pv.h"
+#include "services/ntp/ntp.h"
 
 MESSWERT messpuf[MESSPUFSIZE];
 uint16_t mwindex = 0;
@@ -39,7 +40,7 @@ messen(MESSWERT messwert)
 {
   struct clock_datetime_t zeit;
   static struct clock_datetime_t zeit_vor = {0,{{0,0,0,0,0}},0};
-  uip_ipaddr_t ntp_ipaddr;
+  static uip_ipaddr_t ntp_ipaddr;
 
   debug_printf("Messen aufgerufen.\n");
 
@@ -61,7 +62,7 @@ messen(MESSWERT messwert)
       // Try PTB servers ptbtime1.ptb.de ptbtime2.ptb.de
       // 192.53.103.108 und 192.53.103.104
       uip_ipaddr(&ntp_ipaddr, 192,53,103,108);
-      ntp_conf(ntp_ipaddr);
+      ntp_conf(&ntp_ipaddr);
       ntp_send_packet();
     }
     if(zeit.min > 2) {
@@ -69,7 +70,7 @@ messen(MESSWERT messwert)
       // Try PTB servers ptbtime1.ptb.de ptbtime2.ptb.de
       // 192.53.103.108 und 192.53.103.104
       uip_ipaddr(&ntp_ipaddr, 192,53,103,104);
-      ntp_conf(ntp_ipaddr);
+      ntp_conf(&ntp_ipaddr);
       ntp_send_packet();
     }
     //Reboot, if no NTP conn. after 10 mins

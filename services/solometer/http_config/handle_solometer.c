@@ -119,14 +119,14 @@ int urldecode(char* ptr)
 }
 // END Decode GET Method-sent Form data
 
-int get_string(char *ptr, const char *pattern, char target[], int len)
+int get_string(char *ptr, const char *pattern, char *target, int len)
 {
   char *ptr1,*ptr2,c;
 
-  target[0] = 0;
+  //*target = 0;
   ptr1 = strstr_P(ptr,pattern);
   if(ptr1 != NULL) {
-    ptr1 += 4;
+    ptr1 += strlen_P(pattern);
     ptr2 = strchrnul(ptr1,'&');
     if(ptr2 != ptr1) {
       c = *ptr2;
@@ -134,15 +134,16 @@ int get_string(char *ptr, const char *pattern, char target[], int len)
       ptr1 = strncpy(target,ptr1,len);
       *ptr2 = c;
       target[len-1] = 0;
+      return(strlen(target));
     }
   }
-  return(strlen(target));
+  return 0;
 }
 
 int8_t
 solometer_parse (char* ptr)
 {
-  char *str,*ptr1,*ptr2,c,*buf;
+  char *str,*ptr1,c,*buf;
   uip_ipaddr_t dnsserver;
   int n;
   int16_t *int1_p,*int2_p,*int3_p,*int4_p;

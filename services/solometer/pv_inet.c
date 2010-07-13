@@ -205,7 +205,11 @@ mcp_net_init()
 #ifdef DNS_SUPPORT
     if (! (post_hostip_p = resolv_lookup(post_hostname))) {
       debug_printf("Hostname unknown. Starting Query.\n");
-      resolv_query(post_hostname, mcp_net_connect);
+      //resolv_query(post_hostname, mcp_net_connect);
+      // If hostname is not known, try resolve and use
+      // post_hostip for now
+      resolv_query(post_hostname, NULL);
+      mcp_net_connect(post_hostname, &post_hostip);
     } else {
       debug_printf("Hostname known. Connecting...\n");
       mcp_net_connect(post_hostname, post_hostip_p);
