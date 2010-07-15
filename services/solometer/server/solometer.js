@@ -35,7 +35,7 @@ function ShowHistory(evt,ide,n)
     ;// Do nothing for now
   } else {
     // ide == Monat
-    ;
+    var mywindow = window.open("showday.svg?TAG="+bindatum[n],bindatum[n]);
   }
 }
 
@@ -655,6 +655,8 @@ function global_parameters()
     //monatstage = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
     tagesnamen = new Array();
     tageswerte = new Array();
+    bindatum = new Array();
+    binmonat = new Array();
     for(i=0;i<31;i++) {
       tagesnamen[i] = (i+1).toString()+".";
       //tageswerte[i] = Math.random() * 10000;
@@ -981,6 +983,7 @@ function update_days_data(str)
       tag = parseInt(Erg3[0],10);
       monat = parseInt(Erg3[1],10) - 1;
       jahr = parseInt(Erg3[2],10);
+      bindatum[29-i] = Erg3[2]+Erg3[1]+Erg3[0];
       tageswerte[29-i] = (Erg3[3]*1)+(Erg3[5]*1)+(Erg3[7]*1)+(Erg3[9]*1)+(Erg3[11]*1);
       tagesnamen[29-i] = tag+'.'+mnamenlookup[monat];
       j = i;

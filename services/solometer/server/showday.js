@@ -1109,7 +1109,7 @@ function read_mins_data()
 {
   var req = new XMLHttpRequest(),dateiname;
   // Check for URL GET parameter DATE
-  if((mdate = get_GET_param("DATE")) == false) {
+  if((mdate = get_GET_param("TAG")) == false) {
 	  // Caching umgehen...Ok, so ist's suboptimal.
 	  dateiname='day.dat?'+Math.random();
   } else {
@@ -1165,7 +1165,7 @@ function read_meas_data()
 {
   var req = new XMLHttpRequest(),dateiname;
   // Check for URL GET parameter DATE
-  if((mdate = get_GET_param("DATE")) == false) {
+  if((mdate = get_GET_param("TAG")) == false) {
 	  // Caching umgehen...Ok, so ist's suboptimal.
 	  dateiname='meas.dat?'+Math.random();
   } else {

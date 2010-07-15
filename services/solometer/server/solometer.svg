@@ -36,7 +36,7 @@
     <feBlend in = "SourceGraphic" in2 = "blurOut" mode = "normal"/>
   </filter>
 
-  <script type="text/ecmascript" xlink:href="solometer1.js" />
+  <script type="text/ecmascript" xlink:href="solometer.js" />
   <script type="text/ecmascript"> <![CDATA[
     global_parameters();
     create_graph(jahrestitel,"Jahr",monatsnamen,monatswerte,0.0);
