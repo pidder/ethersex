@@ -32,7 +32,7 @@ WBOXFARBE = "RoyalBlue";
 function ShowHistory(evt,ide,n)
 {
   if(ide == "Jahr") {
-    ;// Do nothing for now
+    var mywindow = window.open("showmonth.svg?MONAT="+binmonat[n],binmonat[n]);
   } else {
     // ide == Monat
     var mywindow = window.open("showday.svg?TAG="+bindatum[n],bindatum[n]);
@@ -48,33 +48,41 @@ function ShowTooltip(evt,ide,n)
 
   animation_stop = true;
   //alert("STT: "+n);
-  ttboxelem=document.getElementById("ttbox");
-  ttrelem=document.getElementById("ttr");
-  tttelem=document.getElementById("ttt");
-  var hr = 6 + Math.floor(n/12);
-  var mn = (n%12)*5;
-  if(mn < 10)
-    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":0"+mn);
-  else
-    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
 
-  //tttelem.firstChild.replaceData(0,100,"Id: "+ide);
+  if(isNaN(messwerte[n][0]) && isNaN(messwerte[n][0]) && isNaN(messwerte[n][0])) {
+    ttboxelem=document.getElementById("ndbox");
+    ttrelem=document.getElementById("ndr");
+    tttelem=document.getElementById("ndt");
 
-  i = 0;
-  var child = tttelem.firstChild;
-  while (child != null) {
-    if (child.nodeName == "tspan" && child.hasChildNodes()) {
-      if (child.firstChild.nodeType == 3 && child.id == "wert") {
+  } else {
+    ttboxelem=document.getElementById("ttbox");
+    ttrelem=document.getElementById("ttr");
+    tttelem=document.getElementById("ttt");
+    var hr = 6 + Math.floor(n/12);
+    var mn = (n%12)*5;
+    if(mn < 10)
+      tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":0"+mn);
+    else
+      tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
+
+    //tttelem.firstChild.replaceData(0,100,"Id: "+ide);
+
+    i = 0;
+    var child = tttelem.firstChild;
+    while (child != null) {
+      if (child.nodeName == "tspan" && child.hasChildNodes()) {
+	if (child.firstChild.nodeType == 3 && child.id == "wert") {
 	  child.firstChild.replaceData(0,100,messwerte[n][i++]);
+	}
       }
+      child = child.nextSibling;
     }
-    child = child.nextSibling;
   }
   var posx=evt.pageX;
   var posy=evt.pageY;
   var ttboxwidth=ttrelem.getAttribute("width");
   var ttboxheight=ttrelem.getAttribute("height");
-  
+
   if(posx < Fensterweite()-ttboxwidth)
     ttboxelem.setAttribute("x",posx);
   else
@@ -90,14 +98,11 @@ function ShowTooltip(evt,ide,n)
 
 function HideTooltip()
 {
-  var ttrelem, ttrelem;
-  //alert("HTT");
-  ttboxelem=document.getElementById("ttbox");
-  //ttrelem=document.getElementById("ttr");
-  //tttelem=document.getElementById("ttt");
+  // Hide all tooltips
+  var ttboxelem=document.getElementById("ttbox");
+  var ndboxelem=document.getElementById("ndbox");
   ttboxelem.setAttribute("style","visibility: hidden");
-  //ttrelem.setAttribute("style","visibility: hidden");
-  //tttelem.setAttribute("style","visibility: hidden");
+  ndboxelem.setAttribute("style","visibility: hidden");
   animation_stop = false;
 }
 
@@ -423,7 +428,8 @@ function create_graph(titel,ident,namen,werte,opacity)
       shape.setAttributeNS(null, "onmouseover", "ShowTooltip(evt,\""+ident+"\","+i+")");
       shape.setAttributeNS(null, "onmouseout", "HideTooltip()");
     } else {
-      shape.setAttributeNS(null, "onclick", "ShowHistory(evt,\""+ident+"\","+i+")");
+      if(ident != "Monat" || (i != (xticks -1)))
+	shape.setAttributeNS(null, "onclick", "ShowHistory(evt,\""+ident+"\","+i+")");
     }
     gruppe.appendChild(shape);
   }
@@ -893,6 +899,7 @@ function update_months_data(str)
 	  first_line=false;
 	}
 	// Hole Monatsnamen zu Monatsstring
+	binmonat[11-j] = Ergebnis[1] + "_" + Ergebnis[2];
 	monatsnamen[11-j] = mnamenlookup[monatsnr];
 	if(j == 0) {
 	  monatswerte[11-j] = wert + tageswerte[30];

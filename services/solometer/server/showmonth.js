@@ -30,28 +30,28 @@ WBOXFARBE = "RoyalBlue";
 //***********************
 
 function get_GET_params() {
-	var GET = new Array();
-	if(location.search.length > 0) {
-	  var get_param_str = location.search.substring(1, location.search.length);
-	  var get_params = get_param_str.split("&");
-	  for(i = 0; i < get_params.length; i++) {
-	     var key_value = get_params[i].split("=");
-	     if(key_value.length == 2) {
-	       var key = key_value[0];
-	       var value = key_value[1];
-	       GET[key] = value;
-	    }
-	  }
-	}
-   return(GET);
+var GET = new Array();
+  if(location.search.length > 0) {
+    var get_param_str = location.search.substring(1, location.search.length);
+    var get_params = get_param_str.split("&");
+    for(i = 0; i < get_params.length; i++) {
+      var key_value = get_params[i].split("=");
+      if(key_value.length == 2) {
+	var key = key_value[0];
+	var value = key_value[1];
+	GET[key] = value;
+      }
+    }
+  }
+  return(GET);
 }
 
 function get_GET_param(key) {
-	var get_params = get_GET_params();
-	if(get_params[key])
-	  return(get_params[key]);
-	else
-	  return false;
+  var get_params = get_GET_params();
+  if(get_params[key])
+    return(get_params[key]);
+  else
+    return false;
 }
 
 function ShowHistory(evt,ide,n)
@@ -60,7 +60,7 @@ function ShowHistory(evt,ide,n)
     ;// Do nothing for now
   } else {
     // ide == Monat
-    ;
+    var mywindow = window.open("showday.svg?TAG="+bindatum[n],bindatum[n]);
   }
 }
 
@@ -521,7 +521,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   shape.setAttributeNS(null, "x", xpos);
   shape.setAttributeNS(null, "y", ypos);
   shape.setAttributeNS(null, "width", 2*xoff);
-  shape.setAttributeNS(null, "height", yoff*1.2);
+  shape.setAttributeNS(null, "height", yoff*0.8);
   shape.setAttributeNS(null, "rx", xoff/20);
   shape.setAttributeNS(null, "ry", xoff/20);
   shape.setAttributeNS(null, "stroke", "black");
@@ -585,7 +585,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   shape.appendChild(data);
   gruppe.appendChild(shape);
 
-  // Wbox text2
+/*  // Wbox text2
   data = document.createTextNode(t_wboxtxt2);
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt2");
@@ -623,7 +623,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   shape.setAttributeNS(null, "fill", "white");
   shape.appendChild(data);
   gruppe.appendChild(shape);
-
+*/
   // Gruppe ins Dokument einhängen
   document.documentElement.appendChild(gruppe);
 
@@ -680,6 +680,8 @@ function global_parameters()
     //monatstage = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
     tagesnamen = new Array();
     tageswerte = new Array();
+    bindatum = new Array();
+    binmonat = new Array();
     for(i=0;i<31;i++) {
       tagesnamen[i] = (i+1).toString()+".";
       //tageswerte[i] = Math.random() * 10000;
@@ -814,7 +816,7 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
   txt1R = document.getElementById(ident+".wboxtxt1R");
   txt1R.firstChild.replaceData(0,100,wboxtxt1LR[1])
 
-  // Ersetze Text2 und hole Textbreite
+/*  // Ersetze Text2 und hole Textbreite
   txt2 = document.getElementById(ident+".wboxtxt2");   
   txt2.firstChild.replaceData(0,100,wboxtxt2)
   txtbr = txt2.getComputedTextLength();
@@ -828,7 +830,7 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
   txt2L.firstChild.replaceData(0,100,wboxtxt2LR[0]+":")
   txt2R = document.getElementById(ident+".wboxtxt2R");
   txt2R.firstChild.replaceData(0,100,wboxtxt2LR[1])
-
+*/
   txtbr = boxbr;
   boxbr *= 1.1;
 
@@ -864,13 +866,13 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
   txt1L.setAttributeNS(null, "x", xpos + boxbr*0.05);
   txt1R.setAttributeNS(null, "x", xpos + boxbr*0.95);
 
-  txt2.setAttributeNS(null, "x", xpos1);
+/*  txt2.setAttributeNS(null, "x", xpos1);
   txt2.setAttributeNS(null, "textLength", "80");
 
   txt2.setAttributeNS(null, "fill-opacity", 0);
   txt2L.setAttributeNS(null, "x", xpos + boxbr*0.05);
   txt2R.setAttributeNS(null, "x", xpos + boxbr*0.95);
-
+*/
   shape = document.getElementById(ident+".wbox");
   shape.setAttributeNS(null, "x", xpos);
   shape.setAttributeNS(null, "width", boxbr);
@@ -1012,7 +1014,6 @@ function update_days_data(str)
     fjahr = 0;
     fmonat = 0;
   }
-  //alert(fmonat+"_"+fjahr);
   // Zeilen trennen
   var summe = 0;
   i = 0;
@@ -1024,11 +1025,11 @@ function update_days_data(str)
       tag = parseInt(Erg3[0],10);
       monat = parseInt(Erg3[1],10) - 1;
       jahr = parseInt(Erg3[2],10);
-      //alert(monat+"-"+jahr);
       if(fjahr != 0 && fmonat != 0 && jahr == fjahr && monat <= fmonat) {
 	if(monat < fmonat) {
 	  tageswerte[30-i] = 0;
 	} else {
+	  bindatum[30-i] = Erg3[2]+Erg3[1]+Erg3[0];
 	  tageswerte[30-i] = (Erg3[3]*1)+(Erg3[5]*1)+(Erg3[7]*1)+(Erg3[9]*1)+(Erg3[11]*1);
 	  summe += tageswerte[30-i];
 	}

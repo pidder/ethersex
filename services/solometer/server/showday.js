@@ -73,6 +73,73 @@ function ShowTooltip(evt,ide,n)
 
   animation_stop = true;
   //alert("STT: "+n);
+
+  if(isNaN(messwerte[n][0]) && isNaN(messwerte[n][1]) && isNaN(messwerte[n][1])) {
+    ttboxelem=document.getElementById("ndbox");
+    ttrelem=document.getElementById("ndr");
+    tttelem=document.getElementById("ndt");
+
+  } else {
+    ttboxelem=document.getElementById("ttbox");
+    ttrelem=document.getElementById("ttr");
+    tttelem=document.getElementById("ttt");
+    var hr = 6 + Math.floor(n/12);
+    var mn = (n%12)*5;
+    if(mn < 10)
+      tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":0"+mn);
+    else
+      tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
+
+    //tttelem.firstChild.replaceData(0,100,"Id: "+ide);
+
+    i = 0;
+    var child = tttelem.firstChild;
+    while (child != null) {
+      if (child.nodeName == "tspan" && child.hasChildNodes()) {
+	if (child.firstChild.nodeType == 3 && child.id == "wert") {
+	  child.firstChild.replaceData(0,100,messwerte[n][i++]);
+	}
+      }
+      child = child.nextSibling;
+    }
+  }
+  var posx=evt.pageX;
+  var posy=evt.pageY;
+  var ttboxwidth=ttrelem.getAttribute("width");
+  var ttboxheight=ttrelem.getAttribute("height");
+
+  if(posx < Fensterweite()-ttboxwidth)
+    ttboxelem.setAttribute("x",posx);
+  else
+    ttboxelem.setAttribute("x",posx-ttboxwidth);
+
+  if(posy < ttboxheight)
+    ttboxelem.setAttribute("y",posy);
+  else
+    ttboxelem.setAttribute("y",posy-ttboxheight);
+
+  ttboxelem.setAttribute("style","visibility: visible");
+}
+
+function HideTooltip()
+{
+  // Hide all tooltips
+  var ttboxelem=document.getElementById("ttbox");
+  var ndboxelem=document.getElementById("ndbox");
+  ttboxelem.setAttribute("style","visibility: hidden");
+  ndboxelem.setAttribute("style","visibility: hidden");
+  animation_stop = false;
+}
+
+/*function ShowTooltip(evt,ide,n)
+{
+  var i, ttrelem, ttrelem, posx, posy;
+
+  if(dieses.id != ide)
+    return;
+
+  animation_stop = true;
+  //alert("STT: "+n);
   ttboxelem=document.getElementById("ttbox");
   ttrelem=document.getElementById("ttr");
   tttelem=document.getElementById("ttt");
@@ -125,7 +192,7 @@ function HideTooltip()
   //tttelem.setAttribute("style","visibility: hidden");
   animation_stop = false;
 }
-
+*/
 // Window-Resize detektieren und Fenstergroesse anpassen
 function Fensterweite () {
   if (window.innerWidth) {
