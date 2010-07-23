@@ -67,6 +67,11 @@
     <text id="ndt" x="10" y="2em" style="fill: #FFFFFF; font-size: 11px">Keine Messdaten verfügbar.</text>
   </svg>
 
+  <g id="ndstamp" x="200" y="300" width="1000" height="70" style="visibility: hidden">
+    <rect id="ndsr" x="0" y="0" width="750" height="70" style="fill:RoyalBlue; stroke:#000000; stroke-width: 1px; opacity: 0.9" rx="5" ry="5"/>
+    <text id="ndst" x="10" y="50" style="fill: black; font-size: 50px">Keine Messdaten verfügbar.</text>
+  </g>
+
   <script type="text/ecmascript"> <![CDATA[
     dieses = document.getElementById("Tag");
   ]]></script>

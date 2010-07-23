@@ -29,6 +29,32 @@ WBOXFARBE = "RoyalBlue";
 //    Ende Parameter    *
 //***********************
 
+function set_no_data() {
+
+  var xpos = xoff+breite/2;
+  var ypos = yoff+hoehe/2;
+  var nds_fontsize = yoff/2;
+  var ndselem=document.getElementById("ndstamp");
+  var ndsrelem=document.getElementById("ndsr");
+  var ndstelem=document.getElementById("ndst");
+  
+  ndstelem.setAttributeNS(null, "font-size", yoff/2);
+  boxbr = ndstelem.getComputedTextLength();
+  ndselem.setAttributeNS(null, "x", xpos - boxbr/2 -10);
+  ndselem.setAttributeNS(null, "width", boxbr + 20);
+  ndsrelem.setAttributeNS(null, "x", xpos - boxbr/2 -10);
+  ndsrelem.setAttributeNS(null, "width", boxbr +20);
+  ndselem.setAttributeNS(null, "y", ypos);
+  ndsrelem.setAttributeNS(null, "y", ypos);
+  ndstelem.setAttributeNS(null, "y", ypos+nds_fontsize);
+
+  ndstelem.setAttributeNS(null, "x", xpos);
+  ndstelem.setAttributeNS(null, "text-anchor", "middle");
+
+
+  ndselem.setAttribute("style","visibility: visible");
+}
+
 function get_GET_params() {
 	var GET = new Array();
 	if(location.search.length > 0) {
@@ -131,68 +157,6 @@ function HideTooltip()
   animation_stop = false;
 }
 
-/*function ShowTooltip(evt,ide,n)
-{
-  var i, ttrelem, ttrelem, posx, posy;
-
-  if(dieses.id != ide)
-    return;
-
-  animation_stop = true;
-  //alert("STT: "+n);
-  ttboxelem=document.getElementById("ttbox");
-  ttrelem=document.getElementById("ttr");
-  tttelem=document.getElementById("ttt");
-  var hr = 6 + Math.floor(n/12);
-  var mn = (n%12)*5;
-  if(mn < 10)
-    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":0"+mn);
-  else
-    tttelem.firstChild.replaceData(0,100,"Messwerte "+hr+":"+mn);
-
-  //tttelem.firstChild.replaceData(0,100,"Id: "+ide);
-
-  i = 0;
-  var child = tttelem.firstChild;
-  while (child != null) {
-    if (child.nodeName == "tspan" && child.hasChildNodes()) {
-      if (child.firstChild.nodeType == 3 && child.id == "wert") {
-	  child.firstChild.replaceData(0,100,messwerte[n][i++]);
-      }
-    }
-    child = child.nextSibling;
-  }
-  var posx=evt.pageX;
-  var posy=evt.pageY;
-  var ttboxwidth=ttrelem.getAttribute("width");
-  var ttboxheight=ttrelem.getAttribute("height");
-  
-  if(posx < Fensterweite()-ttboxwidth)
-    ttboxelem.setAttribute("x",posx);
-  else
-    ttboxelem.setAttribute("x",posx-ttboxwidth);
-
-  if(posy < ttboxheight)
-    ttboxelem.setAttribute("y",posy);
-  else
-    ttboxelem.setAttribute("y",posy-ttboxheight);
-
-  ttboxelem.setAttribute("style","visibility: visible");
-}
-
-function HideTooltip()
-{
-  var ttrelem, ttrelem;
-  //alert("HTT");
-  ttboxelem=document.getElementById("ttbox");
-  //ttrelem=document.getElementById("ttr");
-  //tttelem=document.getElementById("ttt");
-  ttboxelem.setAttribute("style","visibility: hidden");
-  //ttrelem.setAttribute("style","visibility: hidden");
-  //tttelem.setAttribute("style","visibility: hidden");
-  animation_stop = false;
-}
-*/
 // Window-Resize detektieren und Fenstergroesse anpassen
 function Fensterweite () {
   if (window.innerWidth) {
@@ -605,7 +569,7 @@ function create_graph(titel,ident,namen,werte,opacity)
     data = document.createTextNode("Erzeugte Energie:");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt0");
-  shape.setAttributeNS(null, "x", xpos1);
+  shape.setAttributeNS(null, "x", xpos+10);
   shape.setAttributeNS(null, "y", yoff*1.35);
   shape.setAttributeNS(null, "text-anchor", "start");
   shape.setAttributeNS(null, "font-size", yoff*0.3);
@@ -614,7 +578,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text1
-  data = document.createTextNode("Leistung");
+  data = document.createTextNode(" ");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt1");
   shape.setAttributeNS(null, "x", xpos1);
@@ -627,7 +591,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text1L
-  data = document.createTextNode("LeistungL");
+  data = document.createTextNode(" ");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt1L");
   shape.setAttributeNS(null, "x", xpos1);
@@ -640,7 +604,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text1R
-  data = document.createTextNode("LeistungR");
+  data = document.createTextNode(" ");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt1R");
   shape.setAttributeNS(null, "x", xpos1);
@@ -725,7 +689,7 @@ function global_parameters()
     monatsnamen = new Array("Jan", "Feb", "Mrz", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez");
     jahrestitel="Jahresübersicht";
     monatstitel = "Dezember 2009"
-    tagestitel = "28. Dezember 2009"
+    tagestitel = "Warte auf Daten..."
     vortag = 99; // 99 ist beim Programmstart immer verschieden von jedem nat. Tag
     vormonat = 99;
     vorjahr = 10000;
@@ -765,7 +729,7 @@ function global_parameters()
       } else {
 	minutennamen[i] = "";
       }
-      //minutenwerte[i] = Math.random() * 100;
+      //minutenwerte[i] = 0;
     }
     jahresdaten = new Array([0,0],[0,0]);
     // Diese Skalierungen für die y-Achse gibt es
@@ -1192,6 +1156,8 @@ function read_mins_data()
 	var a = new Date();
 	tag_last = "Letzte Daten vom "+a.getDate()+"."+(Number(a.getMonth())+1)+". "+a.getHours()+":"+(Number(a.getMinutes())>9?"":"0")+a.getMinutes();
 	update_mins_data(req.responseText);
+      } else {
+	set_no_data();
       }
     }
   }
