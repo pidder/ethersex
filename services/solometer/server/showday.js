@@ -29,6 +29,7 @@ WBOXFARBE = "RoyalBlue";
 //    Ende Parameter    *
 //***********************
 
+// Displays info box if no data is available
 function set_no_data() {
 
   var xpos = xoff+breite/2;
@@ -38,23 +39,33 @@ function set_no_data() {
   var ndsrelem=document.getElementById("ndsr");
   var ndstelem=document.getElementById("ndst");
   
-  ndstelem.setAttributeNS(null, "font-size", yoff/2);
+  ndstelem.setAttributeNS(null, "font-size", nds_fontsize);
   boxbr = ndstelem.getComputedTextLength();
+  while(boxbr > breite*0.8) {
+	  nds_fontsize /= 2;
+	  ndstelem.setAttributeNS(null, "font-size", nds_fontsize);
+	  boxbr = ndstelem.getComputedTextLength();
+  }
+  
   ndselem.setAttributeNS(null, "x", xpos - boxbr/2 -10);
   ndselem.setAttributeNS(null, "width", boxbr + 20);
-  ndsrelem.setAttributeNS(null, "x", xpos - boxbr/2 -10);
-  ndsrelem.setAttributeNS(null, "width", boxbr +20);
   ndselem.setAttributeNS(null, "y", ypos);
+  ndselem.setAttributeNS(null, "height", nds_fontsize*1.25);
+
+  ndsrelem.setAttributeNS(null, "x", xpos - boxbr/2 -10);
+  ndsrelem.setAttributeNS(null, "width", boxbr + 20);
   ndsrelem.setAttributeNS(null, "y", ypos);
-  ndstelem.setAttributeNS(null, "y", ypos+nds_fontsize);
+  ndsrelem.setAttributeNS(null, "height", nds_fontsize*1.25);
 
   ndstelem.setAttributeNS(null, "x", xpos);
+  ndstelem.setAttributeNS(null, "font-size", nds_fontsize);
   ndstelem.setAttributeNS(null, "text-anchor", "middle");
-
+  ndstelem.setAttributeNS(null, "y", ypos+nds_fontsize);
 
   ndselem.setAttribute("style","visibility: visible");
 }
 
+// Extracts data from GET request
 function get_GET_params() {
 	var GET = new Array();
 	if(location.search.length > 0) {
@@ -72,6 +83,7 @@ function get_GET_params() {
    return(GET);
 }
 
+// Returns GET request data for particular key
 function get_GET_param(key) {
 	var get_params = get_GET_params();
 	if(get_params[key])
