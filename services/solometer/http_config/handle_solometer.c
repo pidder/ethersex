@@ -144,7 +144,9 @@ int8_t
 solometer_parse (char* ptr)
 {
   char *str,*ptr1,c,*buf;
+#ifdef DNS_SUPPORT
   uip_ipaddr_t dnsserver;
+#endif
   int n;
   int16_t *int1_p,*int2_p,*int3_p,*int4_p;
 
@@ -216,6 +218,7 @@ solometer_parse (char* ptr)
   }
   debug_printf("Ausgewertet:HIP=--%s--\n",buf);
 
+#ifdef DNS_SUPPORT
   if(get_string(ptr,PSTR("DNS="),buf,16)) {
     n = sscanf(buf,"%d.%d.%d.%d",int1_p,int2_p,int3_p,int4_p);
     if(n == 4) {
@@ -235,6 +238,7 @@ solometer_parse (char* ptr)
     buf[0] = 0;
   }
   debug_printf("Ausgewertet:DNS=--%s--\n",buf);
+#endif
 
   free(ptr);
   free(buf);
@@ -247,7 +251,10 @@ httpd_handle_solometer (void)
   static int8_t i = 0;
   static uint8_t cont_send = 0, parsing = 0;
   uint16_t mss;
-  uip_ipaddr_t hostaddr,dnsserver;
+  uip_ipaddr_t hostaddr;
+#ifdef DNS_SUPPORT
+  uip_ipaddr_t dnsserver;
+#endif
   char *buf;
 
   debug_printf("Handle_solometer called.\n");
@@ -435,10 +442,12 @@ httpd_handle_solometer (void)
 	  break;
 	} else {
 	  buf=(char*)malloc(16);
+#ifdef DNS_SUPPORT
 	  eeprom_restore(dns_server, &dnsserver, IPADDR_LEN);
 	  print_ipaddr(&dnsserver,buf,16);
 	  buf[15]=0;
 	  snprintf_P(uip_appdata + strlen(uip_appdata),50, PSTR("  <p>DNS Server IP [%s"),buf);
+#endif
 	  cont_send++;
 	  free(buf);
 	}
@@ -448,7 +457,9 @@ httpd_handle_solometer (void)
 	  PASTE_SEND();
 	  break;
 	} else {
+#ifdef DNS_SUPPORT
 	  PASTE_P(PSTR("]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"));
+#endif
 	  cont_send++;
 	}
       case 15:
