@@ -189,7 +189,7 @@ solometer_parse (char* ptr)
   }
   debug_printf("Ausgewertet:WRID=--%u--\n",WRID[0]);
 
-  if(get_string(ptr,PSTR("ID="),post_cookie,11)) {
+  if(get_string(ptr,PSTR("PVID="),post_cookie,11)) {
     eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);
     eeprom_update_chksum();
   }
@@ -400,7 +400,7 @@ httpd_handle_solometer (void)
 	  PASTE_SEND();
 	  break;
 	} else {
-	  PASTE_P (PSTR("]:<br><input name=\"ID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
+	  PASTE_P (PSTR("]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
 	  cont_send++;
 	}
       case 9:
