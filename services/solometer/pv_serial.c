@@ -38,6 +38,7 @@ extern char post_hostname[];
 extern char post_cookie[];
 extern uip_ipaddr_t post_hostip;
 extern char post_scriptname[];
+extern uint8_t WRID[];
 
 struct pv_serial_buffer pv_recv_buffer;
 struct pv_serial_buffer pv_send_buffer;
@@ -75,7 +76,10 @@ pv_init()
   memset(post_hostip,0,sizeof(uip_ipaddr_t));
   eeprom_restore(solometer_hostip, post_hostip, sizeof(uip_ipaddr_t));
 
-//#ifdef PV_SOLOMETER_ID
+  WRID[0] = 1;
+  eeprom_restore(solometer_WRID, WRID, 1);
+
+  //#ifdef PV_SOLOMETER_ID
   memset(post_cookie,0,11);
   eeprom_restore(solometer_cookie, post_cookie, 10);
   //n = snprintf(post_cookie,12,PV_SOLOMETER_ID);

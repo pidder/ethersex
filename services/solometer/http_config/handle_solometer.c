@@ -33,7 +33,7 @@ struct param parameter[] = {
 { "Webhost script:",	"SCR",	"text",	post_scriptname,63,	solometer_script}
 };
 */
-extern WRID[];
+extern uint8_t WRID[];
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
 "Content-Length: 1000\n";
@@ -184,10 +184,10 @@ solometer_parse (char* ptr)
 
   if(get_string(ptr,PSTR("WRID="),buf,3)) {
     WRID[0] = (uint8_t)atoi(buf);
-    //eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);
-    //eeprom_update_chksum();
+    eeprom_save(solometer_WRID, &WRID[0], 1);
+    eeprom_update_chksum();
   }
-  debug_printf("Ausgewertet:PVID=--%s--\n",post_cookie);
+  debug_printf("Ausgewertet:WRID=--%u--\n",WRID[0]);
 
   if(get_string(ptr,PSTR("ID="),post_cookie,11)) {
     eeprom_save(solometer_cookie, post_cookie, strlen(post_cookie) + 1);

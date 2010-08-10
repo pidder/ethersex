@@ -109,6 +109,7 @@ struct eeprom_config_t {
 	uip_ipaddr_t solometer_hostip;
 	char solometer_script[64];
 	char solometer_cookie[11];
+	uint8_t solometer_WRID;
 #endif
 
     uint8_t crc;
