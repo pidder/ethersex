@@ -73,6 +73,12 @@ messen(MESSWERT messwert)
       ntp_conf(&ntp_ipaddr);
       ntp_send_packet();
     }
+    if(zeit.min > 3) {
+      debug_printf("Trying 192.168.0.1.\n");
+      uip_ipaddr(&ntp_ipaddr, 192,168,0,1);
+      ntp_conf(&ntp_ipaddr);
+      ntp_send_packet();
+    }
     //Reboot, if no NTP conn. after 10 mins
     if(zeit.min > 10)
       status.request_reset = 1;

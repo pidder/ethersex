@@ -26,6 +26,7 @@
 
 extern uint16_t expected_bytes;
 extern struct pv_serial_buffer pv_recv_buffer;
+uint8_t WRID[] = {1,0,0,0,0,0,0,0};
 
 uint16_t CALCUL_CRC(uint8_t *Msg, uint16_t lenght)
 {
@@ -62,6 +63,7 @@ wr_read()
   //bzero(pv_recv_buffer.data,PV_SERIAL_BUFFER_LEN);
   p = memset(pv_recv_buffer.data,0,PV_SERIAL_BUFFER_LEN);
   pv_recv_buffer.len = 0;
+  effekta_msg[0] = WRID[0];
   CRCsum = CALCUL_CRC(effekta_msg,6);
   effekta_msg[6] = (unsigned char)(CRCsum & 0xff);
   effekta_msg[7] = (unsigned char)((CRCsum >> 8) & 0xff);
