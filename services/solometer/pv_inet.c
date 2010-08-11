@@ -198,7 +198,7 @@ mcp_net_connect(char *name, uip_ipaddr_t *ipaddr)
 void
 mcp_net_init()
 {
-  //uip_ipaddr_t *ip;
+  uip_ipaddr_t *dnsserver;
 
   // Falls noch keine Verbindung besteht ist post_conn=NULL
   if (! post_conn) {
@@ -208,7 +208,10 @@ mcp_net_init()
       //resolv_query(post_hostname, mcp_net_connect);
       // If hostname is not known, try resolve and use
       // post_hostip for now
-      resolv_query(post_hostname, NULL);
+      if(((dnsserver = resolv_getserver()) != NULL) && !(uip_ipaddr_cmp_instant(dnsserver,0,0,0,0))) {
+	debug_printf("Got DNS Server address != 0.0.0.0.Trying resolve_query.\n");
+	resolv_query(post_hostname, NULL);
+      }
       mcp_net_connect(post_hostname, &post_hostip);
     } else {
       debug_printf("Hostname known. Connecting...\n");
