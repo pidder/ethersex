@@ -61,7 +61,7 @@ bootp_net_main(void)
 	if(uip_udp_conn->appstate.bootp.retry_counter < 5)
 	    uip_udp_conn->appstate.bootp.retry_timer =
 		2 << (++ uip_udp_conn->appstate.bootp.retry_counter);
-	else if(uip_udp_conn->appstate.bootp.retry_counter < 15)
+	else if(++uip_udp_conn->appstate.bootp.retry_counter < 10)
 	    uip_udp_conn->appstate.bootp.retry_timer = 64 + (rand() & 63);
 	else {
 	  // Set an IP from the Zeroconf area in 169.254.0.0/16,
@@ -71,6 +71,8 @@ bootp_net_main(void)
 	  uip_ipaddr_t zcip;
 	  uip_ipaddr(&zcip,169,154,44,44);
 	  uip_sethostaddr(&zcip);
+	  uip_ipaddr(&zcip,255,255,0,0);
+	  uip_setnetmask(&zcip);
 	  debug_printf("Aborting BOOTP. Setting Zeroconf IP 169.154.44.44.\n");
 	  uip_udp_remove(uip_udp_conn);
 	}
