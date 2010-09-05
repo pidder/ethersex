@@ -69,11 +69,11 @@ bootp_net_main(void)
 	  // This is NOT the correct Zeroconf way and has to be improved
 	  // because there is no check for collisions(, yet)!
 	  uip_ipaddr_t zcip;
-	  uip_ipaddr(&zcip,169,154,44,44);
+	  uip_ipaddr(&zcip,169,254,44,44);
 	  uip_sethostaddr(&zcip);
 	  uip_ipaddr(&zcip,255,255,0,0);
 	  uip_setnetmask(&zcip);
-	  debug_printf("Aborting BOOTP. Setting Zeroconf IP 169.154.44.44.\n");
+	  debug_printf("Aborting BOOTP. Setting Zeroconf IP 169.254.44.44.\n");
 	  uip_udp_remove(uip_udp_conn);
 	}
     }
