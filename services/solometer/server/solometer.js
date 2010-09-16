@@ -317,10 +317,12 @@ function create_graph(titel,ident,namen,werte,opacity)
     //Halbiere Fontgröße
     xticklabel_fontsize /= 2;
   }
+  yeinh = "Wh";
   // Das kann man noch verbessern!!
   if(ident == "Tag") {
     xticklabel_fontsize = hoehe/20;
     rotate = 0;
+    yeinh = "W";
   } else if(ident == "Monat") {
     xticklabel_fontsize = 0.8 * breite / xticks;
     rotate = 90;
@@ -328,9 +330,9 @@ function create_graph(titel,ident,namen,werte,opacity)
 
   yticks = ymaxticks;
   ynamen = yscales[ymaxticksindex];
+  ynamen.reverse();
   yticks = ynamen.length;
   ymaxscale = yscales[ymaxticksindex][1];
-  yeinh = "Wh";
 
   // Erzeuge die Gruppe, die den Graph enthält
   gruppe = document.createElementNS(svgns, "g");
@@ -420,7 +422,7 @@ function create_graph(titel,ident,namen,werte,opacity)
     shape.setAttributeNS(null, "x", xoff+(i+0.05)*breite/xticks);
     shape.setAttributeNS(null, "y", yoff);
     shape.setAttributeNS(null, "width", 0.9*breite/xticks);
-    shape.setAttributeNS(null, "height", hoehe);
+    shape.setAttributeNS(null, "height", 0);
     shape.setAttributeNS(null, "stroke", "#000000");
     shape.setAttributeNS(null, "stroke-width", "1");
     shape.setAttributeNS(null, "fill", "yellow");
@@ -521,14 +523,19 @@ function create_graph(titel,ident,namen,werte,opacity)
   shape.setAttributeNS(null, "id", ident+".wboxtxt0");
   shape.setAttributeNS(null, "x", xpos1);
   shape.setAttributeNS(null, "y", yoff*1.35);
-  shape.setAttributeNS(null, "text-anchor", "start");
+  shape.setAttributeNS(null, "text-anchor", "middle");
   shape.setAttributeNS(null, "font-size", yoff*0.3);
   shape.setAttributeNS(null, "fill", "white");
   shape.appendChild(data);
   gruppe.appendChild(shape);
 
   // Wbox text1
-  data = document.createTextNode("Leistung");
+  if(ident == "Tag")
+    data = document.createTextNode("Leistung: 0 W");
+  else if(ident == "Monat")
+    data = document.createTextNode("Dieser Monat: 0 Wh");
+  else
+    data = document.createTextNode("Dieses Jahr: 0 Wh");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt1");
   shape.setAttributeNS(null, "x", xpos1);
@@ -541,9 +548,22 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text1L
-  data = document.createTextNode("LeistungL");
+  data = document.createTextNode("");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt1L");
+  shape.setAttributeNS(null, "x", xpos1);
+  shape.setAttributeNS(null, "y", yoff*1.73);
+  shape.setAttributeNS(null, "text-anchor", "middle");
+  shape.setAttributeNS(null, "lengthAdjust", "spacing");
+  shape.setAttributeNS(null, "font-size", yoff*0.3);
+  shape.setAttributeNS(null, "fill", "white");
+  shape.appendChild(data);
+  gruppe.appendChild(shape);
+
+  // Wbox text1R
+  data = document.createTextNode("");
+  shape = document.createElementNS(svgns, "text");
+  shape.setAttributeNS(null, "id", ident+".wboxtxt1R");
   shape.setAttributeNS(null, "x", xpos1);
   shape.setAttributeNS(null, "y", yoff*1.73);
   shape.setAttributeNS(null, "text-anchor", "start");
@@ -553,21 +573,13 @@ function create_graph(titel,ident,namen,werte,opacity)
   shape.appendChild(data);
   gruppe.appendChild(shape);
 
-  // Wbox text1R
-  data = document.createTextNode("LeistungR");
-  shape = document.createElementNS(svgns, "text");
-  shape.setAttributeNS(null, "id", ident+".wboxtxt1R");
-  shape.setAttributeNS(null, "x", xpos1);
-  shape.setAttributeNS(null, "y", yoff*1.73);
-  shape.setAttributeNS(null, "text-anchor", "end");
-  shape.setAttributeNS(null, "lengthAdjust", "spacing");
-  shape.setAttributeNS(null, "font-size", yoff*0.3);
-  shape.setAttributeNS(null, "fill", "white");
-  shape.appendChild(data);
-  gruppe.appendChild(shape);
-
   // Wbox text2
-  data = document.createTextNode(t_wboxtxt2);
+  if(ident == "Tag")
+    data = document.createTextNode("Energie: 0 Wh");
+  else if(ident == "Monat")
+    data = document.createTextNode("Letzter Monat: 0 Wh");
+  else
+    data = document.createTextNode("Letztes Jahr: 0 Wh");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt2");
   shape.setAttributeNS(null, "x", xpos1);
@@ -580,7 +592,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text2L
-  data = document.createTextNode(t_wboxtxt2+"L");
+  data = document.createTextNode(t_wboxtxt2+"");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt2L");
   shape.setAttributeNS(null, "x", xpos1);
@@ -593,7 +605,7 @@ function create_graph(titel,ident,namen,werte,opacity)
   gruppe.appendChild(shape);
 
   // Wbox text2R
-  data = document.createTextNode(t_wboxtxt2+"R");
+  data = document.createTextNode(t_wboxtxt2+"");
   shape = document.createElementNS(svgns, "text");
   shape.setAttributeNS(null, "id", ident+".wboxtxt2R");
   shape.setAttributeNS(null, "x", xpos1);
@@ -638,8 +650,8 @@ function global_parameters()
     lmnamenlookup = new Array("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember");
     monatsnamen = new Array("Jan", "Feb", "Mrz", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez");
     jahrestitel="Jahresübersicht";
-    monatstitel = "Dezember 2009"
-    tagestitel = "28. Dezember 2009"
+    monatstitel = "Monatsübersicht"
+    tagestitel = "Tagesübersicht"
     vortag = 99; // 99 ist beim Programmstart immer verschieden von jedem nat. Tag
     vormonat = 99;
     vorjahr = 10000;
