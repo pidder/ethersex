@@ -49,7 +49,7 @@ static char PROGMEM ps2[] = " HTTP/1.0\r\nHost: ";
 static char PROGMEM ps3[] = "\r\nCookie: PVID=";
 // post_cookie goes here
 static char PROGMEM ps4[] = "\r\nContent-Type: multipart/form-data; boundary=bOunDaRy"
-	"\r\nContent-Length: 160000\r\n\r\n";
+	"\r\nContent-Length: 1600\r\n\r\n";
 static char PROGMEM poststr2[] = "--bOunDaRy\r\nContent-Disposition: form-data; name=\"file\"; filename=\"";
 // post_filename goes here
 static char PROGMEM poststr3[] = "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
