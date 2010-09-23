@@ -665,8 +665,8 @@ function global_parameters()
     m_wboxtxt2 = "";
     j_wboxtxt1 = "";
     j_wboxtxt2 = "";
-    // Werte erstmal willkürlich initialisieren
-    monatswerte = new Array(10,20,30,40,50,60,70,80,90,100,110,120);
+    // Werte initialisieren
+    monatswerte = new Array(0,0,0,0,0,0,0,0,0,0,0,0);
     akt_jahr = -1;
     akt_monat = -1;
     akt_monatswert_bis_gestern = 0;
@@ -675,9 +675,19 @@ function global_parameters()
     tageswerte = new Array();
     bindatum = new Array();
     binmonat = new Array();
-    for(i=0;i<31;i++) {
-      tagesnamen[i] = (i+1).toString()+".";
-      //tageswerte[i] = Math.random() * 10000;
+
+    var cdate = new Date();
+    var ndate = new Date();
+    j = -1;
+    var step = 24 * 3600000;
+    while(++j < 31) {
+      ndate.setTime(cdate.getTime() -(j*step));
+      tagesnamen[30-j] = ndate.getDate() + "." + mnamenlookup[ndate.getMonth()];
+      tageswerte[30-j] = 0;
+    }
+
+    for(i=0;i<12;i++) {
+      monatsnamen[11-i] = mnamenlookup[(cdate.getMonth() - i)<0?(cdate.getMonth() - i+12):(cdate.getMonth() - i)];
     }
     minutennamen = new Array();
     minutenwerte = new Array();
@@ -693,7 +703,7 @@ function global_parameters()
       } else {
 	minutennamen[i] = "";
       }
-      //minutenwerte[i] = Math.random() * 100;
+      minutenwerte[i] = 0;
     }
     jahresdaten = new Array([0,0],[0,0]);
     // Diese Skalierungen für die y-Achse gibt es
@@ -793,6 +803,7 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
   // Wbox
   // Text0: hole Textbreite
   txt0 = document.getElementById(ident+".wboxtxt0");   
+  txt0.setAttributeNS(null, "text-anchor", "start");
   boxbr = txt0.getComputedTextLength();
   // Ersetze Text1 und hole Textbreite
   txt1 = document.getElementById(ident+".wboxtxt1");   
@@ -805,8 +816,11 @@ function update_graph(ident,namen,werte,titel,last,wboxtxt1,wboxtxt2)
   // Left + Right aligned
   wboxtxt1LR = wboxtxt1.split(":");
   txt1L = document.getElementById(ident+".wboxtxt1L");
+  txt1L.setAttributeNS(null, "text-anchor", "start");
+
   txt1L.firstChild.replaceData(0,100,wboxtxt1LR[0]+":")
   txt1R = document.getElementById(ident+".wboxtxt1R");
+  txt1R.setAttributeNS(null, "text-anchor", "end");
   txt1R.firstChild.replaceData(0,100,wboxtxt1LR[1])
 
   // Ersetze Text2 und hole Textbreite
