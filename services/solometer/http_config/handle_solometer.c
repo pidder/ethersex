@@ -33,20 +33,37 @@ struct param parameter[] = {
 { "Webhost script:",	"SCR",	"text",	post_scriptname,63,	solometer_script}
 };
 */
+
 extern uint8_t WRID[];
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
-"Content-Length: 1000\n";
-static char PROGMEM p1a[] = "Content-Type: text/html; charset=utf-8\n\n"
-"<html>\n<head>\n"
+"Content-Length: 1000\n"
+"Content-Type: text/html; charset=utf-8\n\n";
+// static char PROGMEM p1a[] = "Content-Type: text/html; charset=utf-8\n\n"
+// "<html>\n<head>\n"
+// "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n";
+// static char PROGMEM p1b[] = "<title>SOL-O-METER CONFIGURATION</title>\n"
+// "</head>\n<body>\n"
+// "<form action=\"http://";
+// // My Ipaddr goes here
+// static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n";
+// // Inputs go here
+// static char PROGMEM p3[] = "  <input type=\"submit\" value=\" Absenden \">\n"
+// "</form>\n"
+// "</BODY>\n</HTML>\n";
+
+char PROGMEM website[] = "<html>\n<head>\n"
 "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n";
-static char PROGMEM p1b[] = "<title>SOL-O-METER CONFIGURATION</title>\n"
+"<title>SOL-O-METER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
-"<form action=\"http://";
-// My Ipaddr goes here
-static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n";
-// Inputs go here
-static char PROGMEM p3[] = "  <input type=\"submit\" value=\" Absenden \">\n"
+"<form action=\"http://%%1/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+"  <p>Wechselrichter ID [%%2]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
+"  <p>Solometer ID [%%3]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
+"  <p>Webhost Name [%%4]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"  <p>Webhost IP (optional) [%%5]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"  <p>Webhost Script [%%6]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"  <p>DNS Server IP [%%7]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"  <input type=\"submit\" value=\" Absenden \">\n"
 "</form>\n"
 "</BODY>\n</HTML>\n";
 
@@ -315,6 +332,7 @@ httpd_handle_solometer (void)
       } else {
 	PASTE_P (p1);
 	cont_send = 1;
+	ppos = 0;
       }
       //debug_printf("%d: %s\n",cont_send,uip_appdata);
       PASTE_SEND ();
@@ -325,186 +343,83 @@ httpd_handle_solometer (void)
 
   if(uip_acked()) {
     PASTE_RESET();
-    switch(cont_send) {
-      case 0:
-	uip_close();
-	break;
-      case 1:
-	if(strlen(uip_appdata) + strlen_P(p1a) > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(p1a);
-	  cont_send++;
+    uip_appdata[0] = 0;
+    lpos = 0;
+    pct = 0;
+    ppos = 0;
+    index = 0;
+    //printf("%d\n",strlen(website));
+    while(ppos < strlen(website)) {
+      lpos = 0;
+      send_packet = 0;
+      while(lpos < mss && ppos < strlen(website) && send_packet == 0) {
+	c = website[ppos++];
+	//printf("c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
+	switch(pct) {
+	  case 1:
+	    if(c == '%') {
+	      pct = 2;
+	    } else {
+	      *(char *)(uip_appdata+(lpos++)) = '%';
+	      *(char *)(uip_appdata+(lpos++)) = c;
+	      *(char *)(uip_appdata+lpos) = 0;
+	      pct = 0;
+	    }
+	    break;
+	  case 2:
+	    if(c == '%') {
+	      *(char *)(uip_appdata+(lpos++)) = '%';
+	      *(char *)(uip_appdata+lpos) = 0;
+	    } else if(c >= 0x30 && c <= 0x39) {
+	      index = index*10 + (c-0x30);
+	      pct = 3;
+	    } else {
+	      *(char *)(uip_appdata+(lpos++)) = '%';
+	      *(char *)(uip_appdata+(lpos++)) = '%';
+	      *(char *)(uip_appdata+(lpos++)) = c;
+	      *(char *)(uip_appdata+lpos) = 0;
+	      pct = 0;
+	    }
+	    break;
+	  case 3:
+	    if(c >= 0x30 && c <= 0x39) {
+	      index = index*10 + (c-0x30);
+	    } else {
+	      switch(p[index].typ) {
+		case PR_INT:
+		  lpos += sprintf(uip_appdata+lpos,p[index].s2,*(int*)p[index].s3);
+		  break;
+		default:
+		  lpos += sprintf(uip_appdata+lpos,p[index].s2,p[index].s3);
+		  break;
+	      }
+	      index = 0;
+	      if(c == '%') {
+		pct = 1;
+	      } else {
+		pct = 0;
+		*(char *)(uip_appdata+(lpos++)) = c;
+		*(char *)(uip_appdata+lpos) = 0;
+	      }
+	    }
+	    break;
+	  default:
+	    if(c == '%') {
+	      if(lpos > mss-64) {
+		ppos--;
+		send_packet = 1;
+	      } else {
+		pct = 1;
+	      }
+	    } else {
+	      *(char *)(uip_appdata+(lpos++)) = c;
+	      *(char *)(uip_appdata+lpos) = 0;
+	    }
+	    break;
 	}
-      case 2:
-	if(strlen(uip_appdata) + strlen_P(p1b) > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(p1b);
-	  cont_send++;
-	}
-      case 3:
-	if(strlen(uip_appdata) + 16 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  uip_gethostaddr(&hostaddr);
-	  uint8_t *ip = (uint8_t *) &hostaddr;
-	  snprintf_P(uip_appdata + strlen(uip_appdata),16, PSTR("%u.%u.%u.%u"),ip[0], ip[1], ip[2], ip[3]);
-	  cont_send++;
-	}
-      case 4:
-	if(strlen(uip_appdata) + strlen_P(p2) > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(p2);
-	  cont_send++;
-	}
-      case 5:
-	if(strlen(uip_appdata) + 40 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  snprintf_P(uip_appdata + strlen(uip_appdata),40,PSTR("  <p>Wechselrichter ID [%u"),WRID[0]);
-	  cont_send++;
-	}
-      case 6:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P (PSTR("]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"));
-	  cont_send++;
-	}
-      case 7:
-	if(strlen(uip_appdata) + 40 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  snprintf_P(uip_appdata + strlen(uip_appdata),40,PSTR("  <p>Solometer ID [%s"),post_cookie);
-	  cont_send++;
-	}
-      case 8:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P (PSTR("]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"));
-	  cont_send++;
-	}
-      case 9:
-	if(strlen(uip_appdata) + 90 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Name [%s"),post_hostname);
-	  cont_send++;
-	}
-      case 10:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(PSTR("]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
-	  cont_send++;
-	}
-      case 11:
-	if(strlen(uip_appdata) + 90 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  buf=(char*)malloc(16);
-	  print_ipaddr(&post_hostip,buf,16);
-	  buf[15]=0;
-	  snprintf_P(uip_appdata + strlen(uip_appdata),50, PSTR("  <p>Webhost IP (optional) [%s"),buf);
-	  cont_send++;
-	  free(buf);
-	}
-      case 12:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(PSTR("]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"));
-	  cont_send++;
-	}
-      case 13:
-	if(strlen(uip_appdata) + 90 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  snprintf_P(uip_appdata + strlen(uip_appdata),90, PSTR("  <p>Webhost Script [%s"),post_scriptname);
-	  cont_send++;
-	}
-      case 14:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(PSTR("]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"));
-	  cont_send++;
-	}
-      case 15:
-	if(strlen(uip_appdata) + 90 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  buf=(char*)malloc(16);
-#ifdef DNS_SUPPORT
-	  eeprom_restore(dns_server, &dnsserver, IPADDR_LEN);
-	  print_ipaddr(&dnsserver,buf,16);
-	  buf[15]=0;
-	  snprintf_P(uip_appdata + strlen(uip_appdata),50, PSTR("  <p>DNS Server IP [%s"),buf);
-#endif
-	  cont_send++;
-	  free(buf);
-	}
-      case 16:
-	if(strlen(uip_appdata) + 75 > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-#ifdef DNS_SUPPORT
-	  PASTE_P(PSTR("]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"));
-#endif
-	  cont_send++;
-	}
-      case 17:
-	if(strlen(uip_appdata) + strlen_P(p3) > mss) {
-	  //debug_printf("%d: %s\n",cont_send,uip_appdata);
-	  PASTE_SEND();
-	  break;
-	} else {
-	  PASTE_P(p3);
-	  cont_send++;
-	}
-      default:
-	//debug_printf("%d: %s\n",cont_send,uip_appdata);
-	cont_send = 0;
-	PASTE_SEND();
-	break;
+      }
+      return;
     }
-    return;
-  }
 
   //debug_printf("Unbekanntes Paket. Sende Antwort.\n");
   PASTE_RESET ();
