@@ -23,49 +23,36 @@
 #include "handle_solometer.h"
 #include "protocols/uip/parse.h"
 
-// Parameters to be set by the Web-Frontend
-/*#define NUM_PAR 4
-struct param parameter[] = {
-// Beschreibung 	Name 	Typ	RAM		maxlen	EEPROM
-{ "Sol-O-Meter ID:",	"ID",	"text",	post_cookie,	10,	solometer_cookie},
-{ "Webhost Name:",	"HST",	"text",	post_hostname,	63,	solometer_host},
-{ "Webhost IP:",	"IP",	"text",	post_hostip,	15,	solometer_hostip},
-{ "Webhost script:",	"SCR",	"text",	post_scriptname,63,	solometer_script}
-};
-*/
-
 extern uint8_t WRID[];
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
 "Content-Length: 1000\n"
 "Content-Type: text/html; charset=utf-8\n\n";
-// static char PROGMEM p1a[] = "Content-Type: text/html; charset=utf-8\n\n"
-// "<html>\n<head>\n"
-// "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n";
-// static char PROGMEM p1b[] = "<title>SOL-O-METER CONFIGURATION</title>\n"
-// "</head>\n<body>\n"
-// "<form action=\"http://";
-// // My Ipaddr goes here
-// static char PROGMEM p2[] = "/solometer\" method=\"get\" accept-charset=\"utf-8\">\n";
-// // Inputs go here
-// static char PROGMEM p3[] = "  <input type=\"submit\" value=\" Absenden \">\n"
-// "</form>\n"
-// "</BODY>\n</HTML>\n";
 
 char PROGMEM website[] = "<html>\n<head>\n"
-"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n";
+"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
 "<title>SOL-O-METER CONFIGURATION</title>\n"
 "</head>\n<body>\n"
-"<form action=\"http://%%1/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
-"  <p>Wechselrichter ID [%%2]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
-"  <p>Solometer ID [%%3]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
-"  <p>Webhost Name [%%4]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
-"  <p>Webhost IP (optional) [%%5]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
-"  <p>Webhost Script [%%6]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
-"  <p>DNS Server IP [%%7]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+"  <p>Wechselrichter ID [%%4]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
+"  <p>Solometer ID [%%5]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
+"  <p>Webhost Name [%%6]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"  <p>Webhost IP (optional) [%%7.%%8.%%9.%%10]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"  <p>Webhost Script [%%11]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"  <p>DNS Server IP [%%12.%%13.%%14.%%15]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
 "  <input type=\"submit\" value=\" Absenden \">\n"
 "</form>\n"
 "</BODY>\n</HTML>\n";
+
+typedef struct parameter {
+  uint8_t typ;
+  char *s2;
+  void *s3;
+} PARAM;
+
+#define PR_STRING 0
+#define PR_INT 1
+#define PR_U8 2
 
 char PROGMEM httpd_header_500_smt[] =
 "HTTP/1.1 500 Server Error\n"
@@ -276,11 +263,36 @@ httpd_handle_solometer (void)
   static int8_t i = 0;
   static uint8_t cont_send = 0, parsing = 0;
   uint16_t mss;
-  uip_ipaddr_t hostaddr;
+  static uip_ipaddr_t hostaddr, dnsserver;
+  //char *buf;
+  static int ppos;
+  uint16_t lpos;
+  uint8_t p_par,pct,send_packet;
+
+  uip_gethostaddr(&hostaddr);
 #ifdef DNS_SUPPORT
-  uip_ipaddr_t dnsserver;
+  eeprom_restore(dns_server, &dnsserver, IPADDR_LEN);
 #endif
-  char *buf;
+
+  #define NUM_PAR 16
+  PARAM p[NUM_PAR] = {
+	      {PR_U8,"%u",(uint8_t *)&hostaddr},
+	      {PR_U8,"%u",((uint8_t *)&hostaddr)+1},
+	      {PR_U8,"%u",((uint8_t *)&hostaddr)+2},
+	      {PR_U8,"%u",((uint8_t *)&hostaddr)+3},
+	      {PR_U8,"%u",&WRID[0]},
+	      {PR_STRING,"%s",post_cookie},
+	      {PR_STRING,"%s",post_hostname},
+	      {PR_U8,"%u",(uint8_t *)&post_hostip},
+	      {PR_U8,"%u",((uint8_t *)&post_hostip)+1},
+	      {PR_U8,"%u",((uint8_t *)&post_hostip)+2},
+	      {PR_U8,"%u",((uint8_t *)&post_hostip)+3},
+	      {PR_STRING,"%s",post_scriptname},
+	      {PR_U8,"%u",(uint8_t *)&dnsserver},
+	      {PR_U8,"%u",((uint8_t *)&dnsserver)+1},
+	      {PR_U8,"%u",((uint8_t *)&dnsserver)+2},
+	      {PR_U8,"%u",((uint8_t *)&dnsserver)+3}
+  };
 
   //debug_printf("Handle_solometer called.\n");
   mss = uip_mss();
@@ -342,12 +354,15 @@ httpd_handle_solometer (void)
   }
 
   if(uip_acked()) {
+
+    // Send webpage and fill in parameters %%n, where n
+    // is n'th record of array p of type PARAM
     PASTE_RESET();
-    uip_appdata[0] = 0;
+    //uip_appdata[0] = 0;
     lpos = 0;
     pct = 0;
     ppos = 0;
-    index = 0;
+    p_par = 0;
     //printf("%d\n",strlen(website));
     while(ppos < strlen(website)) {
       lpos = 0;
@@ -371,7 +386,7 @@ httpd_handle_solometer (void)
 	      *(char *)(uip_appdata+(lpos++)) = '%';
 	      *(char *)(uip_appdata+lpos) = 0;
 	    } else if(c >= 0x30 && c <= 0x39) {
-	      index = index*10 + (c-0x30);
+	      p_par = p_par*10 + (c-0x30);
 	      pct = 3;
 	    } else {
 	      *(char *)(uip_appdata+(lpos++)) = '%';
@@ -383,17 +398,20 @@ httpd_handle_solometer (void)
 	    break;
 	  case 3:
 	    if(c >= 0x30 && c <= 0x39) {
-	      index = index*10 + (c-0x30);
+	      p_par = p_par*10 + (c-0x30);
 	    } else {
-	      switch(p[index].typ) {
+	      switch(p[p_par].typ) {
 		case PR_INT:
-		  lpos += sprintf(uip_appdata+lpos,p[index].s2,*(int*)p[index].s3);
+		  lpos += sprintf(uip_appdata+lpos,p[p_par].s2,*(int*)p[p_par].s3);
+		  break;
+		case PR_U8:
+		  lpos += sprintf(uip_appdata+lpos,p[p_par].s2,*(uint8_t*)p[p_par].s3);
 		  break;
 		default:
-		  lpos += sprintf(uip_appdata+lpos,p[index].s2,p[index].s3);
+		  lpos += sprintf(uip_appdata+lpos,p[p_par].s2,p[p_par].s3);
 		  break;
 	      }
-	      index = 0;
+	      p_par = 0;
 	      if(c == '%') {
 		pct = 1;
 	      } else {
@@ -418,9 +436,9 @@ httpd_handle_solometer (void)
 	    break;
 	}
       }
-      return;
+      PASTE_SEND();
     }
-
+  }
   //debug_printf("Unbekanntes Paket. Sende Antwort.\n");
   PASTE_RESET ();
   if(i || mss < 200) {
