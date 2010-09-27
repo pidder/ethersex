@@ -1,21 +1,27 @@
 Allgemeine features
 - Daten zusätzlich auf SD-Karte speichern
+- USB-Stick mit Servern fertigstellen und testen
 
 Solometer-Dateien:
 - Fehlermeldungen des WR mitsenden
 - DC-Spannung und Strom mitsenden
 - Nur Timeouts vom WR -> kein Paket zum Server senden
-- Webinterface zum Einstellen der Parameter:
-  Upload-URL, Eigene IP-Nr., Messfrequenz, Kalibrationsfaktor!!
-  Keep-raw-files,...
+- Kartenreiter in web-config
+- SMANet und SunnyNet implementieren
 
 upload_data.php:
 - Kommentarzeilen in RAW-Files überlesen
 - Akzeptieren versch. files (day.dat, days_hist.dat, *.log)
 - Akzeptiere versch. IDs ->Filename
-- eigene sparsame Web-Konfiguration
+- Jahreswechsel implementieren
 
 server/solometer.js:
-- Display (Jahr) am 1. des Monats fixen
 - wbox besser positionieren
 - Tiptool DC-Spannung, DC-Strom der beiden Tracker
+- Mehrgerätefähigkeit über Cookies
+- Initialisierung über update_graph laufen lassen
+
+Bekannte Fehler:
+- Content-Length des Sendepakets wird nicht richtig berechnet
+  --> Problem mit IIS
+- IE kann Seiten nicht anzeigen. Ample SDK??

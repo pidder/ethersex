@@ -1,0 +1,109 @@
+<html>
+<head>
+<script type="text/javascript">
+read_mins_data();
+function num2str(zahl)
+{
+  var str, einh, expo, mant, tmpstr;
+
+  if(zahl <= 0)
+    return(["0",""]);
+  expo = Math.floor(Math.log(zahl)/Math.log(10));
+  mant = zahl / Math.pow(10,expo);
+  if(expo >= 9) {
+    expo -= 9;
+    einh = "G";
+  } else if(expo >= 6) {
+    expo -= 6;
+    einh = "M";
+  } else if(expo >= 3) {
+    expo -= 3;
+    einh = "k";
+  } else if(expo <= -3) {
+    expo += 3;
+    einh = "m";
+  } else
+    einh = "";
+  if(expo >= 1) {
+    str = Math.floor(mant * Math.pow(10,expo) + 0.5).toString();
+  } else if(expo < 0) {
+    str = Math.floor(mant + 0.5).toString();
+    tmpstr = "0,";
+    for(i = expo+1;i < 0;i++) tmpstr += "0";
+    str = tmpstr + str;
+  } else {
+    str = Math.floor(mant * 10 + 0.5).toString();
+    l = str.length;
+    str = str.substr(0,l-1)+','+str.substr(l-1,1);
+  }
+  return([str,einh])
+}
+
+function num2kstr(zahl)
+{
+  var l, str, einh, expo, mant, tmpstr;
+
+  if(zahl < 1000)
+    return(num2str(zahl));
+
+  expo = Math.floor(Math.log(zahl)/Math.log(10));
+  mant = zahl / Math.pow(10,expo);
+  expo -= 3;
+  einh = "k";
+  if(expo >= 1) {
+    str = Math.floor(mant * Math.pow(10,expo) + 0.5).toString();
+    l = str.length;
+    while(l > 3) {
+      l -= 3;
+      str = str.substr(0,l)+'.'+str.substr(l,str.length - l);
+    }
+  } else {
+    str = Math.floor(mant * 10 + 0.5).toString();
+    l = str.length;
+    str = str.substr(0,l-1)+','+str.substr(l-1,1);
+  }
+  return([str,einh])
+}
+
+function update_mins_data(str)
+{
+  var i,j,monat,tag,datum_setzen=true,tagessumme=0,tmpstr;
+
+  tmparr2 = str.split('\n');
+  Erg = tmparr2[0].match(/[0-9]+/g);
+  if(Erg && Erg.length == 26) {
+    tmpstr = num2kstr((Erg[8]*1)+(Erg[12]*1)+(Erg[16]*1)+(Erg[20]*1)+(Erg[24]*1)); //Tagesleistung
+    document.getElementById("Energie").innerHTML = tmpstr[0]+" "+tmpstr[1]+"Wh";
+    tmpstr = num2kstr(((Erg[6]*1)+(Erg[10]*1)+(Erg[14]*1)+(Erg[18]*1)+(Erg[22]*1))); //Momentane Leistung
+    document.getElementById("Leistung").innerHTML = tmpstr[0]+" "+tmpstr[1]+"W";
+    datum_setzen = false;
+  }
+}
+
+function read_mins_data()
+{
+  var req = new XMLHttpRequest(),dateiname;
+  dateiname='day.dat?'+Math.random();
+  req.open('GET', dateiname, true);
+  req.onreadystatechange = function (aEvt) {
+    if (req.readyState == 4) {
+      if(req.status == 200) {
+	var a = new Date();
+	update_mins_data(req.responseText);
+      }
+    }
+  }
+  req.send(null);
+  setTimeout("read_mins_data()",300000);
+}
+</script>
+</head>
+<body style="background:lightblue;">
+<p>Leider unterst&uuml;tzt Ihr Browser den offenen Grafikstandard SVG (Scalable Vector Graphics) nicht.</p>
+<p>Bitte installieren Sie einen modernen Browser, wie Firefox, Opera oder Safari.</p>
+<table>
+  <tr><td>Momentane Leistung</td><td>:</td><td id="Leistung">0 W</td></tr>
+  <tr><td>Heute eingespeiste Energie</td><td>:</td><td id="Energie">0 Wh</td></tr>
+</table>
+</body>
+</html>
