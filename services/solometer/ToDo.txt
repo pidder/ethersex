@@ -24,4 +24,3 @@ server/solometer.js:
 Bekannte Fehler:
 - Content-Length des Sendepakets wird nicht richtig berechnet
   --> Problem mit IIS
-- IE kann Seiten nicht anzeigen. Ample SDK??

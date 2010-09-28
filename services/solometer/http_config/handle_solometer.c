@@ -29,21 +29,69 @@ static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Content-Length: 1000\n"
 "Content-Type: text/html; charset=utf-8\n\n";
 
-char PROGMEM website[] = "<html>\n<head>\n"
-"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
-"<title>SOL-O-METER CONFIGURATION</title>\n"
-"</head>\n<body>\n"
-"<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
-"  <p>Wechselrichter ID [%%4]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
-"  <p>Solometer ID [%%5]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
-"  <p>Webhost Name [%%6]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
-"  <p>Webhost IP (optional) [%%7.%%8.%%9.%%10]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
-"  <p>Webhost Script [%%11]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
-"  <p>DNS Server IP [%%12.%%13.%%14.%%15]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
-"  <input type=\"submit\" value=\" Absenden \">\n"
-"</form>\n"
-"</BODY>\n</HTML>\n";
+// char PROGMEM website[] = "<html>\n<head>\n"
+// "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
+// "<title>SOL-O-METER CONFIGURATION</title>\n"
+// "</head>\n<body>\n"
+// "<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+// "  <p>Wechselrichter ID [%%4]:<br><input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
+// "  <p>Solometer ID [%%5]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
+// "  <p>Webhost Name [%%6]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+// "  <p>Webhost IP (optional) [%%7.%%8.%%9.%%10]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+// "  <p>Webhost Script [%%11]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+// "  <p>DNS Server IP [%%12.%%13.%%14.%%15]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+// "  <input type=\"submit\" value=\" Absenden \">\n"
+// "</form>\n"
+// "</BODY>\n</HTML>\n";
 
+char PROGMEM website[] = "<html><head><style>\n"
+".b {padding:10px;padding-bottom:0px;display:inline;}\n"
+"#b1 {background:royalblue}\n"
+".t { padding:30px;margin-left:0px;margin-right:20px;background:royalblue;display: none;}\n"
+"#d1 {display: block;}\n"
+"</style>\n"
+"<script type=\"text/javascript\">\n"
+"function s(a) {\n"
+"var bs = document.getElementsByName('b');\n"
+"var ts = document.getElementsByName('t');\n"
+"for(i=0; i<bs.length; i++)\n"
+"if(bs[i].id == a) {\n"
+"bs[i].style.background = \"royalblue\";\n"
+"ts[i].style.display = \"block\";\n"
+"} else {\n"
+"bs[i].style.background = \"lightblue\";\n"
+"ts[i].style.display = 'none';\n"
+"}}\n"
+"</script>\n"
+"<title>SOL-O-METER CONFIGURATION</title>\n"
+"</head><body style=\"background:lightblue;\">\n"
+"<H1 align=\"center\">Sol-O-Meter Konfiguration</H1>\n"
+"<!-- Reiter -->\n"
+"<div id=\"b1\" class=\"b\" name=\"b\" onClick=\"s('b1');\">Sol-O-Meter</div>\n"
+"<div id=\"b2\" class=\"b\" name=\"b\" onClick=\"s('b2');\">Webhost</div>\n"
+"<div id=\"b3\" class=\"b\" name=\"b\" onClick=\"s('b3');\">Wechselrichter</div>\n"
+"<!-- Forms -->\n"
+"<div id=\"d1\" class=\"t\" name=\"t\">\n"
+"<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+"<p>Solometer ID [%%5]:<br><input name=\"PVID\" type=\"text\" size=\"10\" maxlength=\"10\"></p>\n"
+"<p>DNS Server IP [%%12.%%13.%%14.%%15]:<br><input name=\"DNS\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"<input type=\"submit\" value=\" Absenden \">\n"
+"</form></div>\n"
+"<div id=\"d2\" class=\"t\" name=\"t\">\n"
+"<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+"<p>Webhost Name [%%6]:<br><input name=\"HST\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"<p>Webhost IP (optional) [%%7.%%8.%%9.%%10]:<br><input name=\"HIP\" type=\"text\" size=\"16\" maxlength=\"16\"></p>\n"
+"<p>Webhost Script [%%11]:<br><input name=\"SCR\" type=\"text\" size=\"32\" maxlength=\"63\"></p>\n"
+"<input type=\"submit\" value=\" Absenden \">\n"
+"</form></div>\n"
+"<div id=\"d3\" class=\"t\" name=\"t\">\n"
+"<form action=\"http://%%0.%%1.%%2.%%3/solometer\" method=\"get\" accept-charset=\"utf-8\">\n"
+"<p>Wechselrichter ID [%%4]:  <input name=\"WRID\" type=\"text\" size=\"3\" maxlength=\"3\"></p>\n"
+"<p>Fabrikat [SMA]:  <select name=\"FAB\" size=\"1\"><option value=\"1\">Effekta</option><option value=\"2\">SMA</option></select></p>\n"
+"<p>Protokoll [SMANet]:  <select name=\"PRT\" size=\"1\"><option value=\"1\">Effekta</option><option value=\"1\">SMANet</option><option value=\"2\">SunnyNet</option></select></p>\n"
+"<input type=\"submit\" value=\" Absenden \">\n"
+"</form></div></body></html>\n";
+ 
 typedef struct parameter {
   uint8_t typ;
   char *s2;
@@ -260,7 +308,7 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  static int8_t i = 0;
+  static int8_t i = 0,buf[64];
   static uint8_t cont_send = 0, parsing = 0;
   uint16_t mss;
   static uip_ipaddr_t hostaddr, dnsserver;
@@ -357,19 +405,27 @@ httpd_handle_solometer (void)
 
     // Send webpage and fill in parameters %%n, where n
     // is n'th record of array p of type PARAM
+    debug_printf("uip_acked\n");
     PASTE_RESET();
     //uip_appdata[0] = 0;
     lpos = 0;
     pct = 0;
-    ppos = 0;
+    //ppos = 0;
     p_par = 0;
     //printf("%d\n",strlen(website));
-    while(ppos < strlen(website)) {
-      lpos = 0;
+    //while(ppos < strlen(website)) {
+      //lpos = 0;
       send_packet = 0;
-      while(lpos < mss && ppos < strlen(website) && send_packet == 0) {
-	c = website[ppos++];
-	//printf("c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
+      memcpy_P(buf,website+64*(ppos/64),64);
+      while(lpos < mss && ppos < strlen_P(website) && send_packet == 0) {
+	if(!(ppos%64)) {
+	  memcpy_P(buf,website+64*(ppos/64),64);
+	}
+	c = buf[ppos%64];
+	//c = website[ppos++];
+	//memcpy_P(&c,website+ppos,1);
+	ppos++;
+	debug_printf("c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
 	switch(pct) {
 	  case 1:
 	    if(c == '%') {
@@ -437,9 +493,10 @@ httpd_handle_solometer (void)
 	}
       }
       PASTE_SEND();
-    }
+    //}
+    return;
   }
-  //debug_printf("Unbekanntes Paket. Sende Antwort.\n");
+/*  debug_printf("Unbekanntes Paket. Sende Antwort.\n");
   PASTE_RESET ();
   if(i || mss < 200) {
     PASTE_P (httpd_header_500_smt);
@@ -451,6 +508,6 @@ httpd_handle_solometer (void)
   //debug_printf("%d: %s\n",cont_send,uip_appdata);
   PASTE_SEND ();
   parsing = 0;
-  //uip_close();
+  //uip_close();*/
   return;
 }
