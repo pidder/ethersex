@@ -70,6 +70,8 @@ void pv_periodic(void);
 uint8_t pv_rxstart(uint8_t*, uint8_t);
 
 #define PV_SERIAL_BUFFER_LEN 48
+#define PV_SEND_BUFFER_LEN 48
+#define PV_RECEIVE_BUFFER_LEN 262
 
 // From pv_inet
 void post_file(void);

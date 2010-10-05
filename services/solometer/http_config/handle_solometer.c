@@ -26,8 +26,8 @@
 extern uint8_t WRID[];
 static char PROGMEM p1[] = "HTTP/1.1 200 OK\n"
 "Host: solometer.local\n"
-"Content-Length: 1000\n"
-"Content-Type: text/html; charset=utf-8\n\n";
+"Content-Length: ";
+static char PROGMEM p2[] = "Content-Type: text/html; charset=utf-8\n\n";
 
 // char PROGMEM website[] = "<html>\n<head>\n"
 // "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n"
@@ -95,7 +95,7 @@ char PROGMEM website[] = "<html><head><style>\n"
 typedef struct parameter {
   uint8_t typ;
   char *s2;
-  void *s3;
+  char *s3;
 } PARAM;
 
 #define PR_STRING 0
@@ -308,14 +308,14 @@ solometer_parse (char* ptr)
 void
 httpd_handle_solometer (void)
 {
-  static int8_t i = 0,buf[64];
+  static int8_t i = 0;
   static uint8_t cont_send = 0, parsing = 0;
-  uint16_t mss;
+  uint16_t mss,page_size;
   static uip_ipaddr_t hostaddr, dnsserver;
   //char *buf;
-  static int ppos;
-  uint16_t lpos;
-  uint8_t p_par,pct,send_packet;
+  static uint16_t ppos;
+  uint16_t lpos,wslen;
+  uint8_t p_par,pct,send_packet,buf[64];
 
   uip_gethostaddr(&hostaddr);
 #ifdef DNS_SUPPORT
@@ -344,7 +344,10 @@ httpd_handle_solometer (void)
 
   //debug_printf("Handle_solometer called.\n");
   mss = uip_mss();
-
+  if(mss > 400)
+    mss = 400;
+  wslen = strlen_P(website);
+  
   if (uip_newdata()) {
     /* We've received new data (maybe even the first time).  We'll
       receive something like this:
@@ -390,7 +393,15 @@ httpd_handle_solometer (void)
 	PASTE_P (httpd_header_500_smt);
 	cont_send = 0;
       } else {
+	page_size = wslen);
+	for(i=0;i<NUM_PAR;i++)
+	  if(p[i].typ == PR_STRING)
+	    page_size += sprintf(buf,p[i].s2,p[i].s3);
+	  else
+	    page_size += sprintf(buf,p[i].s2,*(uint8_t *)p[i].s3);
 	PASTE_P (p1);
+	sprintf(uip_appdata+uip_len,"%u\n",page_size);
+	PASTE_P (p2);
 	cont_send = 1;
 	ppos = 0;
       }
@@ -402,30 +413,31 @@ httpd_handle_solometer (void)
   }
 
   if(uip_acked()) {
-
     // Send webpage and fill in parameters %%n, where n
     // is n'th record of array p of type PARAM
     debug_printf("uip_acked\n");
-    PASTE_RESET();
-    //uip_appdata[0] = 0;
-    lpos = 0;
-    pct = 0;
-    //ppos = 0;
-    p_par = 0;
-    //printf("%d\n",strlen(website));
-    //while(ppos < strlen(website)) {
+    debug_printf("Aussen c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
+    if(cont_send && ppos < wslen) {
+      PASTE_RESET();
+      lpos = 0;
+      pct = 0;
+      //ppos = 0;
+      p_par = 0;
+      //printf("%d\n",strlen(website));
+      //while(ppos < strlen(website)) {
       //lpos = 0;
       send_packet = 0;
       memcpy_P(buf,website+64*(ppos/64),64);
-      while(lpos < mss && ppos < strlen_P(website) && send_packet == 0) {
+      while(lpos < mss && ppos < wslen && send_packet == 0) {
 	if(!(ppos%64)) {
+	  debug_printf("Innen c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
 	  memcpy_P(buf,website+64*(ppos/64),64);
 	}
 	c = buf[ppos%64];
 	//c = website[ppos++];
 	//memcpy_P(&c,website+ppos,1);
 	ppos++;
-	debug_printf("c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
+	//debug_printf("c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
 	switch(pct) {
 	  case 1:
 	    if(c == '%') {
@@ -492,8 +504,9 @@ httpd_handle_solometer (void)
 	    break;
 	}
       }
+      debug_printf("Sending c: %c, lpos: %d, ppos: %d\n",c,lpos,ppos);
       PASTE_SEND();
-    //}
+    }
     return;
   }
 /*  debug_printf("Unbekanntes Paket. Sende Antwort.\n");
